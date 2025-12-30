@@ -3,8 +3,9 @@ import { BlogPost } from '../types';
 
 const CHANNEL_USERNAME = 'interphase_art';
 const PROXY_URLS = [
+  'https://api.codetabs.com/v1/proxy?quest=',
   'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
+  'https://thingproxy.freeboard.io/fetch/',
 ];
 
 interface FetchResult {

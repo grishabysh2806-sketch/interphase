@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Globe, Moon, Sun, ArrowRight } from 'lucide-react';
 import { NavItem, Language, UIContent } from '../types';
+import { Logo } from './Logo';
 
 interface NavbarProps {
   items: NavItem[];

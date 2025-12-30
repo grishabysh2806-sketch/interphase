@@ -177,6 +177,9 @@ function AppContent() {
       setHasMore(moreAvailable);
     } catch (error) {
       console.error("Failed to load posts", error);
+      if (reset) {
+         setHasMore(false); // Stop trying to load more if initial load fails
+      }
     } finally {
       setLoading(false);
     }

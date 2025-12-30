@@ -138,7 +138,7 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
                    <span className="font-bold uppercase tracking-wider">Sending Failed</span>
                  </div>
                  <p className="text-sm text-center text-gray-500">
-                    Network error. Please try again or email us directly at <a href="mailto:hello@interphase.art" className="underline hover:text-brown dark:hover:text-neon">hello@interphase.art</a>
+                    Network error. Please try again or email us directly at <a href="mailto:hellointerphase@gmail.com" className="underline hover:text-brown dark:hover:text-neon">hellointerphase@gmail.com</a>
                  </p>
                  <button 
                     type="button" 

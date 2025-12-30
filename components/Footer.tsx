@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FooterContent, NavItem } from '../types';
 import { Send, Mail } from 'lucide-react';
+import { Logo } from './Logo';
 
 interface FooterProps {
   content: FooterContent;
@@ -17,8 +18,8 @@ export const Footer: React.FC<FooterProps> = ({ content, navItems }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-20">
             {/* Brand Column */}
             <div className="lg:col-span-1">
-                <Link to="/" className="text-3xl font-display font-bold tracking-tighter text-charcoal dark:text-white mb-6 block">
-                    INTERPHASE<span className="text-brown dark:text-neon">.</span>
+                <Link to="/" className="mb-6 block">
+                    <Logo />
                 </Link>
                 <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">
                    Digital craftsmanship for the bold. We build future-proof web experiences that merge art with engineering.
@@ -52,8 +53,8 @@ export const Footer: React.FC<FooterProps> = ({ content, navItems }) => {
                 <ul className="space-y-4 text-sm text-gray-600 dark:text-gray-400">
                     <li className="flex items-center gap-3">
                         <Mail size={18} className="text-brown dark:text-neon shrink-0" />
-                        <a href="mailto:hellointerphase@proton.me" className="hover:text-brown dark:hover:text-neon transition-colors break-all">
-                            hellointerphase@proton.me
+                        <a href="mailto:hellointerphase@gmail.com" className="hover:text-brown dark:hover:text-neon transition-colors break-all">
+                            hellointerphase@gmail.com
                         </a>
                     </li>
                     <li className="flex items-center gap-3">

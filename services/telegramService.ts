@@ -2,7 +2,10 @@
 import { BlogPost } from '../types';
 
 const CHANNEL_USERNAME = 'interphase_art';
-const PROXY_URL = 'https://corsproxy.io/?';
+const PROXY_URLS = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+];
 
 interface FetchResult {
   posts: BlogPost[];
@@ -24,6 +27,22 @@ const determineCategory = (text: string): string => {
   return 'JOURNAL';
 };
 
+const fetchWithFallback = async (url: string): Promise<string> => {
+    for (const proxy of PROXY_URLS) {
+        try {
+            const fullUrl = `${proxy}${encodeURIComponent(url)}`;
+            const response = await fetch(fullUrl);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const text = await response.text();
+            if (text && text.length > 100) return text; // Basic validation
+        } catch (e) {
+            console.warn(`Proxy ${proxy} failed:`, e);
+            continue;
+        }
+    }
+    throw new Error('All proxies failed');
+};
+
 export const fetchChannelPosts = async (beforeId?: string): Promise<FetchResult> => {
   try {
     const baseUrl = `https://t.me/s/${CHANNEL_USERNAME}`;
@@ -33,12 +52,9 @@ export const fetchChannelPosts = async (beforeId?: string): Promise<FetchResult>
     
     const url = beforeId 
         ? `${baseUrl}?before=${beforeId}${cacheBuster}` 
-        : `${baseUrl}?${cacheBuster}`; // Ensure query param is valid
+        : `${baseUrl}?${cacheBuster}`;
 
-    const response = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`);
-    
-    // corsproxy.io returns the raw HTML content directly, not a JSON object like allorigins.win
-    const contents = await response.text();
+    const contents = await fetchWithFallback(url);
 
     if (!contents) {
       console.error('Failed to fetch Telegram channel HTML');

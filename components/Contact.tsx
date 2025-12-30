@@ -42,8 +42,11 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
         setTimeout(() => setStatus('idle'), 5000);
     } else {
         setStatus('error');
-        setTimeout(() => setStatus('idle'), 5000);
     }
+  };
+
+  const handleRetry = () => {
+    setStatus('idle');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -129,10 +132,22 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
             )}
             
             {status === 'error' && (
-                <div className="flex items-center justify-center gap-2 text-red-500 mt-4 animate-fade-in">
-                    <AlertCircle size={20} />
-                    <span className="font-bold">Failed to send message. Please try again or use Telegram.</span>
-                </div>
+               <div className="flex flex-col items-center gap-2">
+                 <div className="flex items-center gap-2 text-red-500">
+                   <AlertCircle size={20} />
+                   <span className="font-bold uppercase tracking-wider">Sending Failed</span>
+                 </div>
+                 <p className="text-sm text-center text-gray-500">
+                    Network error. Please try again or email us directly at <a href="mailto:hello@interphase.art" className="underline hover:text-brown dark:hover:text-neon">hello@interphase.art</a>
+                 </p>
+                 <button 
+                    type="button" 
+                    onClick={handleRetry}
+                    className="mt-2 text-sm font-bold uppercase tracking-wider text-brown dark:text-neon hover:underline"
+                 >
+                    Retry
+                 </button>
+               </div>
             )}
           </form>
         </Reveal>

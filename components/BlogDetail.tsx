@@ -22,6 +22,29 @@ export const BlogDetail: React.FC<BlogDetailProps> = ({ content, ui }) => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  const handleShare = async () => {
+    const shareData = {
+      title: post?.title || 'Interphase Blog',
+      text: post?.excerpt || 'Check out this article from Interphase.',
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+      }
+    }
+  };
+
   if (!post) {
     return (
         <div className="min-h-screen flex items-center justify-center pt-20">
@@ -77,7 +100,10 @@ export const BlogDetail: React.FC<BlogDetailProps> = ({ content, ui }) => {
                     <Clock size={16} className="text-brown dark:text-neon" />
                     <span>{post.readTime}</span>
                 </div>
-                 <div className="flex items-center gap-2 ml-auto cursor-pointer hover:text-brown dark:hover:text-neon transition-colors">
+                 <div 
+                    className="flex items-center gap-2 ml-auto cursor-pointer hover:text-brown dark:hover:text-neon transition-colors"
+                    onClick={handleShare}
+                >
                     <Share2 size={16} />
                     <span className="hidden sm:inline">{ui.share}</span>
                 </div>

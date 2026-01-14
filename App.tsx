@@ -95,6 +95,18 @@ const HomePage: React.FC<{
   );
 };
 
+const getCookie = (name: string) => {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+};
+
+const setCookie = (name: string, value: string, days: number) => {
+  const d = new Date();
+  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+  const expires = "expires=" + d.toUTCString();
+  document.cookie = name + "=" + value + ";" + expires + ";path=/";
+};
+
 function AppContent() {
   const [lang, setLang] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
@@ -115,10 +127,10 @@ function AppContent() {
     localStorage.setItem('lang', lang);
   }, [lang]);
 
-  // Default to 'light' if not set in localStorage, respecting system preference
+  // Default to 'light' if not set in cookies, respecting system preference
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as 'dark' | 'light';
+      const savedTheme = getCookie('theme') as 'dark' | 'light';
       if (savedTheme) {
         return savedTheme;
       }
@@ -139,7 +151,7 @@ function AppContent() {
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    setCookie('theme', newTheme, 365);
   };
 
   // Update favicon based on theme

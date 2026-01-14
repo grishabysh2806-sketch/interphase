@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BlogPost } from '../../types';
 import { blogService } from '../../services/blogService';
-import { Plus, Edit2, Trash2, LogOut } from 'lucide-react';
+import { supabase } from '../../services/supabaseClient';
+import { Plus, Edit2, Trash2, LogOut, AlertTriangle, CloudOff } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -50,6 +51,21 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-bone dark:bg-dark p-8">
       <div className="max-w-7xl mx-auto">
+        {!supabase && (
+          <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg flex items-start gap-4">
+            <CloudOff className="text-yellow-600 dark:text-yellow-400 shrink-0 mt-1" size={24} />
+            <div>
+              <h3 className="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-1">
+                Offline Mode / Режим оффлайн
+              </h3>
+              <p className="text-yellow-700 dark:text-yellow-400/90 text-sm">
+                Supabase database is not connected. Blogs are saved only in your browser (LocalStorage) and will NOT be visible to other users.
+                <br />
+                База данных Supabase не подключена. Блоги сохраняются только в вашем браузере и НЕ будут видны другим пользователям.
+              </p>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="flex justify-between items-center mb-12">
           <h1 className="text-3xl font-display font-bold text-charcoal dark:text-white">

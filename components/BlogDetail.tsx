@@ -129,6 +129,7 @@ export const BlogDetail: React.FC<BlogDetailProps> = ({ content, ui }) => {
                 prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:font-light prose-p:leading-relaxed
                 prose-strong:text-brown dark:prose-strong:text-neon
                 prose-a:text-brown dark:prose-a:text-neon hover:prose-a:underline
+                break-words
                 "
                 dangerouslySetInnerHTML={{ __html: post.content }}
             />

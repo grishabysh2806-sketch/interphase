@@ -7,14 +7,14 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       { id: 'home', label: 'Home', path: '/' },
       { id: 'services', label: 'Services', path: '/services' },
       { id: 'portfolio', label: 'Work', path: '/portfolio' },
-      { id: 'blog', label: 'Journal', path: '/blog' },
+      { id: 'blog', label: 'Blog', path: '/blog' },
       { id: 'contact', label: 'Contact', path: '/contact' },
     ],
     ui: {
       viewDetails: "View Details",
       systemModule: "System Module",
       backToServices: "Back to Services",
-      backToJournal: "Back to Journal",
+      backToJournal: "Back to Blog",
       readyToStart: "Ready to start?",
       share: "Share",
       readMore: "Read More",
@@ -227,13 +227,21 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           liveUrl: 'https://ponedelnik-demo.vercel.app/',
           description: 'A digital cultural magazine focusing on visual aesthetics and modern culture. Real-time content parsing from the database to the site was implemented. As a result - stylish work without glitches.'
         },
+        { 
+          id: '7', 
+          title: '388.nail', 
+          category: 'Beauty & Wellness', 
+          imageUrl: 'https://picsum.photos/800/600?random=7',
+          liveUrl: 'https://388-alpha.vercel.app/',
+          description: 'A tropical paradise in the city. We created a digital experience that reflects their "mini-vacation" concept, bringing the Bali jungle vibes to the web.'
+        },
       ]
     },
     blog: {
       title: "Insights",
-      subtitle: "JOURNAL",
+      subtitle: "BLOG",
       readMore: "Read Article",
-      backText: "Back to Journal",
+      backText: "Back to Blog",
       items: [
         {
           id: 'future-of-interfaces',
@@ -361,14 +369,14 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       { id: 'home', label: 'Главная', path: '/' },
       { id: 'services', label: 'Услуги', path: '/services' },
       { id: 'portfolio', label: 'Проекты', path: '/portfolio' },
-      { id: 'blog', label: 'Журнал', path: '/blog' },
+      { id: 'blog', label: 'Блог', path: '/blog' },
       { id: 'contact', label: 'Контакты', path: '/contact' },
     ],
     ui: {
       viewDetails: "Подробнее",
       systemModule: "Системный Модуль",
       backToServices: "Назад к услугам",
-      backToJournal: "Назад в Журнал",
+      backToJournal: "Назад в Блог",
       readyToStart: "Готовы начать?",
       share: "Поделиться",
       readMore: "Читать",
@@ -581,13 +589,21 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           liveUrl: 'https://ponedelnik-demo.vercel.app/',
           description: 'Цифровой журнал о культуре и визуальной эстетике. Современный взгляд на искусство и дизайн. Был реализован парсинг контента с базы данных на сайт в реальном времени. Как итог - стильная работа без сбоев.'
         },
+        { 
+          id: '7', 
+          title: '388.nail', 
+          category: 'Красота и Здоровье', 
+          imageUrl: 'https://picsum.photos/800/600?random=7',
+          liveUrl: 'https://388-alpha.vercel.app/',
+          description: 'Тропический рай в городе. Мы создали цифровой опыт, отражающий концепцию "мини-отпуска", перенеся атмосферу джунглей Бали в веб.'
+        },
       ]
     },
     blog: {
       title: "Инсайты",
-      subtitle: "ЖУРНАЛ",
+      subtitle: "БЛОГ",
       readMore: "Читать Статью",
-      backText: "Назад в Журнал",
+      backText: "Назад в Блог",
       items: [
         {
           id: 'future-of-interfaces',

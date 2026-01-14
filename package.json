@@ -11,8 +11,10 @@
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",
+    "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/vite": "^4.1.18",
     "buffer": "^6.0.3",
+    "framer-motion": "^12.26.1",
     "lucide-react": "^0.562.0",
     "process": "^0.11.10",
     "react": "^19.2.3",

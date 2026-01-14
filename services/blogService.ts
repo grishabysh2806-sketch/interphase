@@ -69,7 +69,11 @@ export const blogService = {
 
   async createPost(post: Omit<BlogPost, 'id' | 'date'>): Promise<BlogPost> {
     const newPost = {
-      ...post,
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      category: post.category,
+      author: post.author || 'Interphase',
       created_at: new Date().toISOString(),
       read_time: post.readTime,
       image_url: post.imageUrl

@@ -108,10 +108,14 @@ export const blogService = {
 
   async updatePost(id: string, updates: Partial<BlogPost>): Promise<void> {
     if (supabase) {
-      const supabaseUpdates: any = { ...updates };
+      const supabaseUpdates: any = {};
+      if (updates.title) supabaseUpdates.title = updates.title;
+      if (updates.excerpt) supabaseUpdates.excerpt = updates.excerpt;
+      if (updates.content) supabaseUpdates.content = updates.content;
+      if (updates.category) supabaseUpdates.category = updates.category;
+      if (updates.author) supabaseUpdates.author = updates.author;
       if (updates.readTime) supabaseUpdates.read_time = updates.readTime;
       if (updates.imageUrl) supabaseUpdates.image_url = updates.imageUrl;
-      // Remove camelCase keys if mapping needed, but Supabase ignores extra usually if not strict
       
       const { error } = await supabase
         .from('blogs')

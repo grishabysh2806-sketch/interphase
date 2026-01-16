@@ -86,15 +86,29 @@ export const AdminBlogEditor: React.FC = () => {
     let newText;
     let newCursorPos;
 
-    if (selectedText) {
-      // Wrap selected text
+    if (tag === 'br') {
+        // Line break
+        newText = text.substring(0, start) + '<br/>\n' + text.substring(end);
+        newCursorPos = start + 6;
+    } else if (tag === 'h3') {
+        // Header
+        const headerText = selectedText || 'Header';
+        newText = text.substring(0, start) + `\n<h3>${headerText}</h3>\n` + text.substring(end);
+        newCursorPos = start + headerText.length + 10;
+    } else if (tag === 'p') {
+        // Paragraph
+        const pText = selectedText || 'Paragraph text...';
+        newText = text.substring(0, start) + `\n<p>${pText}</p>\n` + text.substring(end);
+        newCursorPos = start + pText.length + 8;
+    } else if (selectedText) {
+      // Wrap selected text (bold, italic)
       newText = text.substring(0, start) + `<${tag}>` + selectedText + `</${tag}>` + text.substring(end);
-      newCursorPos = start + selectedText.length + tag.length * 2 + 5; // move after closing tag
+      newCursorPos = start + selectedText.length + tag.length * 2 + 5; 
     } else {
       // Insert empty tags
       const tagString = `<${tag}></${tag}>`;
       newText = text.substring(0, start) + tagString + text.substring(end);
-      newCursorPos = start + tag.length + 2; // move inside tags
+      newCursorPos = start + tag.length + 2; 
     }
     
     setFormData(prev => ({ ...prev, content: newText }));
@@ -314,6 +328,15 @@ export const AdminBlogEditor: React.FC = () => {
                  </button>
                  <button type="button" onClick={() => insertFormat('i')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Italic">
                    <Italic size={18} className="text-charcoal dark:text-white" />
+                 </button>
+                 <button type="button" onClick={() => insertFormat('h3')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Header">
+                   H3
+                 </button>
+                 <button type="button" onClick={() => insertFormat('p')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Paragraph">
+                   P
+                 </button>
+                 <button type="button" onClick={() => insertFormat('br')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Line Break">
+                   BR
                  </button>
                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
                  <button type="button" onClick={insertLink} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Link">

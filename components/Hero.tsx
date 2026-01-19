@@ -15,10 +15,41 @@ export const Hero: React.FC<HeroProps> = ({ title, subtitle, cta, onExplore }) =
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [enableParallax, setEnableParallax] = useState(true);
 
   useEffect(() => {
-    setIsMounted(true); // Trigger animation on mount
-    
+    setIsMounted(true);
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const update = () => setEnableParallax(!reduceMotion.matches && desktop.matches);
+    update();
+
+    if (reduceMotion.addEventListener) {
+      reduceMotion.addEventListener('change', update);
+      desktop.addEventListener('change', update);
+    } else {
+      reduceMotion.addListener(update);
+      desktop.addListener(update);
+    }
+
+    return () => {
+      if (reduceMotion.removeEventListener) {
+        reduceMotion.removeEventListener('change', update);
+        desktop.removeEventListener('change', update);
+      } else {
+        reduceMotion.removeListener(update);
+        desktop.removeListener(update);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!enableParallax) {
+      setScrollY(0);
+      return;
+    }
+
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -34,18 +65,17 @@ export const Hero: React.FC<HeroProps> = ({ title, subtitle, cta, onExplore }) =
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [enableParallax]);
 
   // Parallax calculations
-  const gridTranslateY = scrollY * 0.5; // Moves slower than scroll
-  const textOpacity = Math.max(0, 1 - scrollY / 600); // Fades out
-  const textScale = Math.max(0.9, 1 - scrollY / 2000); // Slight shrink
-  const textTranslateY = scrollY * 0.3; // Text moves slightly down
+  const gridTranslateY = scrollY * 0.5;
+  const textOpacity = Math.max(0, 1 - scrollY / 600);
+  const textScale = Math.max(0.9, 1 - scrollY / 2000);
+  const textTranslateY = scrollY * 0.3;
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       
-      {/* Local 3D Grid Background with Parallax */}
       <div className="perspective-container">
          <div 
             className="grid-floor-container opacity-60 dark:opacity-100 transition-opacity duration-500 will-change-transform"

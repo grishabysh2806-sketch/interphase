@@ -17,11 +17,36 @@ const ProjectPreview: React.FC<{ item: ProjectItem; visitLink?: string }> = ({ i
     const [isLoaded, setIsLoaded] = useState(false);
     const [isMobileActive, setIsMobileActive] = useState(false);
     const [scale, setScale] = useState(1);
+    const [isDesktop, setIsDesktop] = useState(true);
     
     const DESKTOP_WIDTH = 1440;
     const DESKTOP_HEIGHT = 900; // 16:10 aspect ratio based on 1440px width
 
     useEffect(() => {
+        const media = window.matchMedia('(min-width: 768px)');
+        const update = () => setIsDesktop(media.matches);
+        update();
+        if (media.addEventListener) {
+            media.addEventListener('change', update);
+        } else {
+            media.addListener(update);
+        }
+        return () => {
+            if (media.removeEventListener) {
+                media.removeEventListener('change', update);
+            } else {
+                media.removeListener(update);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isDesktop) {
+            setShouldLoad(false);
+            setIsLoaded(false);
+            return;
+        }
+
         const updateScale = () => {
             if (containerRef.current) {
                 const currentWidth = containerRef.current.offsetWidth;
@@ -51,7 +76,7 @@ const ProjectPreview: React.FC<{ item: ProjectItem; visitLink?: string }> = ({ i
             observer.disconnect();
             resizeObserver.disconnect();
         };
-    }, []);
+    }, [isDesktop]);
 
     const handleLoad = () => {
         setIsLoaded(true);
@@ -69,7 +94,7 @@ const ProjectPreview: React.FC<{ item: ProjectItem; visitLink?: string }> = ({ i
             className="w-full h-full relative bg-charcoal/5 group-hover:scale-[1.02] transition-transform duration-500 will-change-transform overflow-hidden cursor-pointer"
             onClick={handleInteraction}
         >
-            {(shouldLoad && item.liveUrl) ? (
+            {(isDesktop && shouldLoad && item.liveUrl) ? (
                  <div className={`transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                       style={{
                           width: `${DESKTOP_WIDTH}px`,
@@ -89,7 +114,7 @@ const ProjectPreview: React.FC<{ item: ProjectItem; visitLink?: string }> = ({ i
                  </div>
             ) : null}
 
-            {(!isLoaded || !shouldLoad) && (
+            {(!isLoaded || !shouldLoad || !isDesktop) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-charcoal/10 text-charcoal/50 z-0">
                     <span className="loading-spinner">Loading Preview...</span>
                 </div>
@@ -114,8 +139,48 @@ const ProjectPreview: React.FC<{ item: ProjectItem; visitLink?: string }> = ({ i
 
 export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, visitLink, items }) => {
     const pathRefs = useRef<(SVGPathElement | null)[]>([]);
+    const sectionRef = useRef<HTMLElement | null>(null);
+    const [canAnimate, setCanAnimate] = useState(false);
+    const [isInView, setIsInView] = useState(false);
 
     useEffect(() => {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const desktop = window.matchMedia('(min-width: 768px)');
+        const update = () => setCanAnimate(!reduceMotion.matches && desktop.matches);
+        update();
+
+        if (reduceMotion.addEventListener) {
+            reduceMotion.addEventListener('change', update);
+            desktop.addEventListener('change', update);
+        } else {
+            reduceMotion.addListener(update);
+            desktop.addListener(update);
+        }
+
+        return () => {
+            if (reduceMotion.removeEventListener) {
+                reduceMotion.removeEventListener('change', update);
+                desktop.removeEventListener('change', update);
+            } else {
+                reduceMotion.removeListener(update);
+                desktop.removeListener(update);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!sectionRef.current) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsInView(entry.isIntersecting),
+            { rootMargin: '200px' }
+        );
+        observer.observe(sectionRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!canAnimate || !isInView) return;
+
         let animationFrameId: number;
         let time = 0;
 
@@ -159,10 +224,10 @@ export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, vi
         return () => {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
         };
-    }, [items]);
+    }, [items, canAnimate, isInView]);
 
   return (
-    <section className="py-24 bg-transparent relative transition-colors duration-500 overflow-visible w-full">
+    <section ref={sectionRef} className="py-24 bg-transparent relative transition-colors duration-500 overflow-visible w-full">
        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <Reveal variant="fade-down" width="100%">
             <div className="flex flex-col items-end mb-24 text-right">

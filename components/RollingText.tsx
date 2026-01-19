@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface RollingTextProps {
   text: string;
@@ -15,7 +15,30 @@ export const RollingText: React.FC<RollingTextProps> = ({
   stagger = 0.03,
   as: Component = 'div'
 }) => {
-  // Split into words, then characters for the true "wheel" effect
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduceMotion(media.matches);
+    update();
+    if (media.addEventListener) {
+      media.addEventListener('change', update);
+    } else {
+      media.addListener(update);
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener('change', update);
+      } else {
+        media.removeListener(update);
+      }
+    };
+  }, []);
+
+  if (reduceMotion) {
+    return <Component className={className}>{text}</Component>;
+  }
+
   const words = text.split(" ");
 
   return (

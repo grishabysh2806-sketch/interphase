@@ -53,8 +53,8 @@ export const Footer: React.FC<FooterProps> = ({ content, navItems }) => {
                 <ul className="space-y-4 text-sm text-gray-600 dark:text-gray-400">
                     <li className="flex items-center gap-3">
                         <Mail size={18} className="text-brown dark:text-neon shrink-0" />
-                        <a href="mailto:hellointerphase@gmail.com" className="hover:text-brown dark:hover:text-neon transition-colors break-all">
-                            hellointerphase@gmail.com
+                        <a href="mailto:bushuev@interphase.pro" className="hover:text-brown dark:hover:text-neon transition-colors break-all">
+                            bushuev@interphase.pro
                         </a>
                     </li>
                     <li className="flex items-center gap-3">

@@ -63,6 +63,12 @@ export const Footer: React.FC<FooterProps> = ({ content, navItems }) => {
                             @interphase_art
                         </a>
                     </li>
+                    <li className="flex items-center gap-3">
+                         <Send size={18} className="text-brown dark:text-neon shrink-0" />
+                         <a href="https://t.me/interphase_pro" target="_blank" rel="noopener noreferrer" className="hover:text-brown dark:hover:text-neon transition-colors">
+                            Связаться с менеджером
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

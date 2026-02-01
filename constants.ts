@@ -171,9 +171,41 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Do you support legacy systems?", answer: "We can wrap legacy systems in modern API layers to make them usable with new tech." }
           ]
         },
+        { 
+          id: 'ai-agent',
+          number: '07', 
+          title: 'AI Agent Creation', 
+          shortDescription: 'Autonomous assistants that work with your data, tools, and workflows.', 
+          longDescription: 'We design and build AI agents that execute tasks, communicate with your stack, and deliver measurable business outcomes. From LLM orchestration to secure tool access and monitoring, we create reliable agents that operate safely and efficiently. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
+          features: ['LLM Strategy & Architecture', 'Tool & API Orchestration', 'Secure Data Connectors', 'Agent Monitoring & Guardrails'],
+          cta: 'Launch AI Agent',
+          faq: [
+            { question: "Can the agent work with our internal tools?", answer: "Yes, we integrate CRMs, databases, ticketing systems, and custom APIs with secure access controls." },
+            { question: "Is the agent safe for production?", answer: "We implement role-based permissions, audit logging, and safety guardrails before deployment." },
+            { question: "What models do you use?", answer: "We select the best model for your use case, balancing quality, latency, and cost." },
+            { question: "How do you measure performance?", answer: "We set KPIs, evaluate response quality, and continuously tune prompts and workflows." },
+            { question: "Can it be multilingual?", answer: "Yes, agents can be configured for multilingual support and localized outputs." }
+          ]
+        },
+        { 
+          id: 'seo-geo',
+          number: '08', 
+          title: 'SEO & GEO Turnkey', 
+          shortDescription: 'Search and generative visibility engineered for conversion.', 
+          longDescription: 'We deliver a full-cycle visibility system: technical SEO, structured content, and GEO (Generative Engine Optimization) that positions your brand inside AI answers. We align information architecture, performance, and content strategy to grow qualified traffic and lead flow. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
+          features: ['Technical SEO & Core Web Vitals', 'Semantic Content Architecture', 'GEO for AI Search & Assistants', 'Analytics, Tracking & Growth'],
+          cta: 'Boost Visibility',
+          faq: [
+            { question: "What is GEO?", answer: "GEO is optimization for AI-driven search and assistants, ensuring your brand is cited and recommended in generative responses." },
+            { question: "Do you work with existing sites?", answer: "Yes, we audit your current stack and implement a prioritized roadmap without breaking live traffic." },
+            { question: "How long to see results?", answer: "Early improvements can appear within weeks, with strong momentum typically in 2-4 months." },
+            { question: "Will you write content?", answer: "Yes, we create or refine content based on intent mapping and semantic clusters." },
+            { question: "Do you provide reporting?", answer: "We deliver transparent dashboards with traffic, rankings, and conversion metrics." }
+          ]
+        },
          { 
           id: 'reputation-guard',
-          number: '07', 
+          number: '09', 
           title: 'Reputation Guard', 
           shortDescription: 'Digital footprint management and brand protection strategies.', 
           longDescription: 'Your reputation is your currency. We implement SEO strategies and content monitoring to ensure your brand is perceived exactly how you intend across the digital landscape. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
@@ -196,46 +228,50 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       visitLink: "VISIT SITE",
       items: [
         { 
-          id: '1', 
-          title: 'ELEUSIS', 
-          category: 'Gaming & Esports', 
-          imageUrl: 'https://picsum.photos/800/600?random=1',
-          liveUrl: 'https://eleusus.vercel.app/',
-          description: 'The ultimate gaming sanctuary. CS2, Dota 2, Valorant tournaments and hardware arsenal. We were tasked with making the site bright and memorable for gamers, resulting in a 29% increase in conversion.'
-        },
-        { 
           id: '2', 
           title: 'StroyMaster Pro', 
           category: 'Construction', 
-          imageUrl: 'https://picsum.photos/800/600?random=2',
-          liveUrl: 'https://building1-lilac.vercel.app/',
+          videoDesktopUrl: '/stroymasterprodesctop.mov',
+          videoMobileUrl: '/stroymasterpromob.mp4',
           description: 'Full-cycle construction and renovation services. From architectural design to turnkey delivery with fixed pricing. We were tasked with building a simple and clear functional landing page, while clearly pointing the user to discounts and special offers. The client was more than satisfied.'
+        },
+        { 
+          id: '1', 
+          title: 'ELEUSIS', 
+          category: 'Gaming & Esports', 
+          videoDesktopUrl: '/eleusisdesctop.mov',
+          videoMobileUrl: '/eleusuismob.mp4',
+          description: 'The ultimate gaming sanctuary. CS2, Dota 2, Valorant tournaments and hardware arsenal. We were tasked with making the site bright and memorable for gamers, resulting in a 29% increase in conversion.'
         },
         { 
           id: '5', 
           title: 'Fourth International', 
           category: 'Education & EdTech', 
-          imageUrl: 'https://picsum.photos/800/600?random=5',
-          liveUrl: 'https://xd-ten-sable.vercel.app/',
+          videoDesktopUrl: '/forthinternationaldesctop.mov',
+          videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Language school and academic community focusing on Chinese, Arabic, and English with cultural immersion. During creation, we integrated a complex system of courses, student and teacher accounts, and a payment system link. A demo version is presented on our site as an NDA was signed. The site successfully implements a complex of educational technologies.'
         },
         { 
           id: '6', 
           title: 'Monday Magazine', 
           category: 'Digital Media', 
-          imageUrl: 'https://picsum.photos/800/600?random=6',
-          liveUrl: 'https://ponedelnik-demo.vercel.app/',
+          videoDesktopUrl: '/mondaydesctop.mov',
+          videoMobileUrl: '/mondaymob.mp4',
           description: 'A digital cultural magazine focusing on visual aesthetics and modern culture. Real-time content parsing from the database to the site was implemented. As a result - stylish work without glitches.'
         },
         { 
           id: '7', 
           title: '388.nail', 
           category: 'Beauty & Wellness', 
-          imageUrl: 'https://picsum.photos/800/600?random=7',
-          liveUrl: 'https://388-alpha.vercel.app/',
+          videoDesktopUrl: '/388desctop.mov',
+          videoMobileUrl: '/388mob.mp4',
           description: 'A tropical paradise in the city. We created a digital experience that reflects their "mini-vacation" concept, bringing the Bali jungle vibes to the web.'
         },
       ]
+    },
+    homeBlog: {
+      title: "Expert Articles",
+      subtitle: "ANALYTICS & NEWS"
     },
     blog: {
       title: "Insights",
@@ -533,9 +569,41 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Поддерживаете старые системы?", answer: "Мы можем 'обернуть' легаси системы в современные API слои." }
           ]
         },
+        { 
+          id: 'ai-agent',
+          number: '07', 
+          title: 'Создание AI-агента', 
+          shortDescription: 'Автономные ассистенты, работающие с вашими данными и инструментами.', 
+          longDescription: 'Мы проектируем и создаем AI-агентов, которые выполняют задачи, общаются с вашими системами и дают измеримый бизнес-эффект. От оркестрации LLM до безопасного доступа к инструментам и мониторинга — мы строим надежных агентов для реальной нагрузки. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
+          features: ['Стратегия LLM и архитектура', 'Оркестрация инструментов и API', 'Безопасные коннекторы данных', 'Мониторинг и контуры безопасности'],
+          cta: 'Запустить AI-агента',
+          faq: [
+            { question: "Агент сможет работать с нашими системами?", answer: "Да, мы интегрируем CRM, базы данных, хелпдески и кастомные API с контролем доступа." },
+            { question: "Насколько это безопасно?", answer: "Мы настраиваем роли, аудит логов и защитные контуры перед запуском в продакшен." },
+            { question: "Какие модели вы используете?", answer: "Мы подбираем оптимальную модель по качеству, задержке и стоимости под вашу задачу." },
+            { question: "Как измеряется эффективность?", answer: "Фиксируем KPI, оцениваем качество ответов и регулярно улучшаем цепочки действий." },
+            { question: "Можно сделать мульти-язычный агент?", answer: "Да, мы настраиваем локализацию и многоязычную поддержку." }
+          ]
+        },
+        { 
+          id: 'seo-geo',
+          number: '08', 
+          title: 'SEO&GEO под ключ', 
+          shortDescription: 'Видимость в поиске и ИИ-ответах с фокусом на конверсию.', 
+          longDescription: 'Мы выстраиваем полный контур видимости: технический SEO, структурированный контент и GEO (Generative Engine Optimization), чтобы ваш бренд появлялся в ответах ИИ. Синхронизируем архитектуру, скорость и контент-стратегию для роста целевого трафика и заявок.',
+          features: ['Технический SEO и Core Web Vitals', 'Семантическая архитектура контента', 'GEO для AI поиска и ассистентов', 'Аналитика, трекинг и рост'],
+          cta: 'Усилить Видимость',
+          faq: [
+            { question: "Что такое GEO?", answer: "GEO — это оптимизация для AI-поиска и ассистентов, чтобы бренд цитировался в генеративных ответах." },
+            { question: "Вы работаете с существующим сайтом?", answer: "Да, мы делаем аудит и внедряем дорожную карту без потери текущего трафика." },
+            { question: "Когда появятся результаты?", answer: "Первые улучшения возможны через несколько недель, устойчивый рост — через 2-4 месяца." },
+            { question: "Вы пишете контент?", answer: "Да, создаем и улучшаем контент на основе интент-кластеров и семантики." },
+            { question: "Есть ли отчетность?", answer: "Мы даем прозрачные отчеты по трафику, позициям и конверсиям." }
+          ]
+        },
          { 
           id: 'reputation-guard',
-          number: '07', 
+          number: '09', 
           title: 'Защита Репутации', 
           shortDescription: 'Управление цифровым следом и стратегии защиты бренда.', 
           longDescription: 'Ваша репутация — это ваша валюта. Мы внедряем SEO-стратегии и мониторинг контента, чтобы ваш бренд воспринимался именно так, как вы задумали. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
@@ -558,46 +626,50 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       visitLink: "СМОТРЕТЬ САЙТ",
       items: [
         { 
-          id: '1', 
-          title: 'ELEUSIS', 
-          category: 'Гейминг & Киберспорт', 
-          imageUrl: 'https://picsum.photos/800/600?random=1',
-          liveUrl: 'https://eleusus.vercel.app/',
-          description: 'Ультимативное игровое пространство. Турниры по CS2, Dota 2, Valorant и топовое железо. Перед нами стояла задача сделать сайт ярким и запоминающимся для геймеров, итогом стало повышение конверсии на 29%'
-        },
-        { 
           id: '2', 
           title: 'StroyMaster Pro', 
           category: 'Строительство', 
-          imageUrl: 'https://picsum.photos/800/600?random=2',
-          liveUrl: 'https://building1-lilac.vercel.app/',
+          videoDesktopUrl: '/stroymasterprodesctop.mov',
+          videoMobileUrl: '/stroymasterpromob.mp4',
           description: 'Полный цикл строительных и ремонтных работ. От архитектурного проекта до сдачи под ключ с фиксированной ценой. Перед нами стояла задача построить простой и понятный функциональный лендеинг, при этом явно указав пользователю на скидки и спецпредложения. Клиент остался более чем доволен.'
+        },
+        { 
+          id: '1', 
+          title: 'ELEUSIS', 
+          category: 'Гейминг & Киберспорт', 
+          videoDesktopUrl: '/eleusisdesctop.mov',
+          videoMobileUrl: '/eleusuismob.mp4',
+          description: 'Ультимативное игровое пространство. Турниры по CS2, Dota 2, Valorant и топовое железо. Перед нами стояла задача сделать сайт ярким и запоминающимся для геймеров, итогом стало повышение конверсии на 29%'
         },
         { 
           id: '5', 
           title: 'Четвертый Интернационал', 
           category: 'Образование & EdTech', 
-          imageUrl: 'https://picsum.photos/800/600?random=5',
-          liveUrl: 'https://xd-ten-sable.vercel.app/',
+          videoDesktopUrl: '/forthinternationaldesctop.mov',
+          videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Школа языков и академическое сообщество. Китайский, арабский и английский с культурным погружением. В ходе создания мы интегрировали сложную систему курсов, аккаунтов студентов и преподавателей и ссылку на платежную систему. На нашем сайте предоставлен демо-вариант сайта, так как был подписан NDA. Сайт успешно реализует комплекс образовательных технологий.'
         },
         { 
           id: '6', 
           title: 'Понедельник', 
           category: 'Digital Медиа', 
-          imageUrl: 'https://picsum.photos/800/600?random=6',
-          liveUrl: 'https://ponedelnik-demo.vercel.app/',
+          videoDesktopUrl: '/mondaydesctop.mov',
+          videoMobileUrl: '/mondaymob.mp4',
           description: 'Цифровой журнал о культуре и визуальной эстетике. Современный взгляд на искусство и дизайн. Был реализован парсинг контента с базы данных на сайт в реальном времени. Как итог - стильная работа без сбоев.'
         },
         { 
           id: '7', 
           title: '388.nail', 
           category: 'Красота и Здоровье', 
-          imageUrl: 'https://picsum.photos/800/600?random=7',
-          liveUrl: 'https://388-alpha.vercel.app/',
+          videoDesktopUrl: '/388desctop.mov',
+          videoMobileUrl: '/388mob.mp4',
           description: 'Тропический рай в городе. Мы создали цифровой опыт, отражающий концепцию "мини-отпуска", перенеся атмосферу джунглей Бали в веб.'
         },
       ]
+    },
+    homeBlog: {
+      title: "Экспертные статьи",
+      subtitle: "АНАЛИТИКА И НОВОСТИ"
     },
     blog: {
       title: "Инсайты",

@@ -85,12 +85,14 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({ items, onContact, 
         </div>
 
         {/* CTA */}
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center">
              <Reveal>
-                 <h2 className="text-3xl font-display font-bold mb-8">{ui.readyToStart}</h2>
-                 <Button onClick={onContact} className="shadow-2xl shadow-brown/20 dark:shadow-neon/20">
-                     {service.cta}
-                 </Button>
+                 <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">
+                     <h2 className="text-4xl md:text-5xl font-display font-bold">{ui.readyToStart}</h2>
+                     <Button onClick={onContact} className="shadow-2xl shadow-brown/20 dark:shadow-neon/20 px-10 md:px-12 py-4 text-base md:text-lg">
+                         {service.cta}
+                     </Button>
+                 </div>
              </Reveal>
         </div>
 

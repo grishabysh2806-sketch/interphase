@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BookOpen, ArrowRight } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
@@ -17,6 +18,7 @@ import { Preloader } from './components/Preloader';
 import { Process } from './components/Process';
 import { FAQ } from './components/FAQ';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { Reveal } from './components/Reveal';
 import { AdminLogin } from './pages/Admin/AdminLogin';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
 import { AdminBlogEditor } from './pages/Admin/AdminBlogEditor';
@@ -38,9 +40,11 @@ const HomePage: React.FC<{
   setLang: (lang: Language) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
-}> = ({ lang, setLang, theme, toggleTheme }) => {
+  blogPosts: BlogPost[];
+}> = ({ lang, setLang, theme, toggleTheme, blogPosts }) => {
   const navigate = useNavigate();
   const content = CONTENT[lang];
+  const latestPosts = (blogPosts.length ? blogPosts : content.blog.items).slice(0, 3);
   
   const scrollToServices = () => {
     const servicesSection = document.getElementById('services-section');
@@ -84,6 +88,65 @@ const HomePage: React.FC<{
         items={content.portfolio.items}
         visitLink={content.portfolio.visitLink}
       />
+      <section className="py-24 bg-transparent relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal>
+            <div className="flex items-center gap-3 mb-6">
+              <BookOpen className="text-brown dark:text-neon shrink-0" size={20} />
+              <span className="text-sm font-bold tracking-[0.2em] uppercase text-brown dark:text-neon">{content.homeBlog.subtitle}</span>
+            </div>
+          </Reveal>
+          <Reveal>
+            <h2 className="text-4xl md:text-5xl font-display font-bold text-charcoal dark:text-white">
+              {content.homeBlog.title}
+            </h2>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+            {latestPosts.map((post, index) => (
+              <Reveal key={post.id} delay={index * 100} width="100%">
+                <div
+                  onClick={() => navigate(`/blog/${post.id}`)}
+                  className="group cursor-pointer h-full flex flex-col rounded-3xl border border-charcoal/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-6 md:p-7 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(111,78,55,0.18)] dark:hover:shadow-[0_24px_60px_rgba(204,255,0,0.16)] hover:border-brown/40 dark:hover:border-neon/40"
+                >
+                  <div className="rounded-2xl overflow-hidden bg-gray-100 dark:bg-charcoal/50 aspect-[16/10] relative">
+                    {post.imageUrl ? (
+                      <img
+                        src={post.imageUrl}
+                        alt={post.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-charcoal dark:to-black flex items-center justify-center">
+                        <BookOpen className="text-charcoal/20 dark:text-white/20" size={48} />
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 bg-white/90 dark:bg-black/90 text-charcoal dark:text-white text-xs font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-gray-400">
+                    <span>{post.date}</span>
+                    <span className="w-1 h-1 bg-brown dark:bg-neon rounded-full"></span>
+                    <span>{post.readTime}</span>
+                  </div>
+                  <h3 className="mt-3 text-2xl font-display font-bold text-charcoal dark:text-white group-hover:text-brown dark:group-hover:text-neon transition-colors leading-tight">
+                    {post.title}
+                  </h3>
+                  <p className="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                  <div className="mt-6 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-charcoal dark:text-white group-hover:gap-4 transition-all duration-300">
+                    {content.blog.readMore} <ArrowRight size={16} className="text-brown dark:text-neon" />
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
       <FAQ 
         title={content.generalFaq.title} 
         subtitle={content.generalFaq.subtitle} 
@@ -218,7 +281,7 @@ function AppContent() {
         {!isAdmin && <Navbar items={content.nav} lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} ui={content.ui} />}
         
         <Routes>
-          <Route path="/" element={<HomePage lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} />} />
+          <Route path="/" element={<HomePage lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} blogPosts={blogPosts} />} />
           <Route path="/services" element={<Services title={content.services.title} subtitle={content.services.subtitle} items={content.services.items} ui={content.ui} onNavigate={(path) => navigate(path)} />} />
           <Route path="/services/:id" element={<ServiceDetail items={content.services.items} ui={content.ui} onContact={() => navigate('/contact')} />} />
           <Route path="/journal" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => {}} />} />

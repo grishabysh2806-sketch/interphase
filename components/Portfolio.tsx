@@ -11,359 +11,423 @@ interface PortfolioProps {
   items: ProjectItem[];
 }
 
-const ProjectPreview: React.FC<{ item: ProjectItem; visitLink?: string }> = ({ item, visitLink }) => {
-    const [shouldLoad, setShouldLoad] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [isMobileActive, setIsMobileActive] = useState(false);
-    const [scale, setScale] = useState(1);
-    const [isDesktop, setIsDesktop] = useState(true);
-    
-    const DESKTOP_WIDTH = 1440;
-    const DESKTOP_HEIGHT = 900; // 16:10 aspect ratio based on 1440px width
+const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean }> = ({ item, hideMobileVideos }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const desktopVideoRef = useRef<HTMLVideoElement>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [canAutoplay, setCanAutoplay] = useState(true);
+  const [allowMotion, setAllowMotion] = useState(true);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [isHover, setIsHover] = useState(false);
+  const [hasHover, setHasHover] = useState(true);
+  const rafRef = useRef<number | null>(null);
 
-    useEffect(() => {
-        const media = window.matchMedia('(min-width: 768px)');
-        const update = () => setIsDesktop(media.matches);
-        update();
-        if (media.addEventListener) {
-            media.addEventListener('change', update);
-        } else {
-            media.addListener(update);
-        }
-        return () => {
-            if (media.removeEventListener) {
-                media.removeEventListener('change', update);
-            } else {
-                media.removeListener(update);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!isDesktop) {
-            setShouldLoad(false);
-            setIsLoaded(false);
-            return;
-        }
-
-        const updateScale = () => {
-            if (containerRef.current) {
-                const currentWidth = containerRef.current.offsetWidth;
-                setScale(currentWidth / DESKTOP_WIDTH);
-            }
-        };
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setShouldLoad(true);
-                    observer.disconnect();
-                }
-            },
-            { rootMargin: '50px' }
-        );
-
-        const resizeObserver = new ResizeObserver(updateScale);
-
-        if (containerRef.current) {
-            observer.observe(containerRef.current);
-            resizeObserver.observe(containerRef.current);
-            updateScale();
-        }
-
-        return () => {
-            observer.disconnect();
-            resizeObserver.disconnect();
-        };
-    }, [isDesktop]);
-
-    const handleLoad = () => {
-        setIsLoaded(true);
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const hoverMedia = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => {
+      const reduced = reduceMotion.matches;
+      setCanAutoplay(!reduced);
+      setAllowMotion(!reduced);
     };
-
-    const handleInteraction = () => {
-        setIsMobileActive(prev => !prev);
+    const updateHover = () => setHasHover(hoverMedia.matches);
+    update();
+    updateHover();
+    if (reduceMotion.addEventListener) {
+      reduceMotion.addEventListener('change', update);
+      hoverMedia.addEventListener('change', updateHover);
+    } else {
+      reduceMotion.addListener(update);
+      hoverMedia.addListener(updateHover);
+    }
+    return () => {
+      if (reduceMotion.removeEventListener) {
+        reduceMotion.removeEventListener('change', update);
+        hoverMedia.removeEventListener('change', updateHover);
+      } else {
+        reduceMotion.removeListener(update);
+        hoverMedia.removeListener(updateHover);
+      }
     };
+  }, []);
 
-    const btnText = visitLink || "СМОТРЕТЬ САЙТ";
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
+      videos.forEach((video) => {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+      });
+    };
+  }, []);
 
-    return (
-        <div 
-            ref={containerRef} 
-            className="w-full h-full relative bg-charcoal/5 group-hover:scale-[1.02] transition-transform duration-500 will-change-transform overflow-hidden cursor-pointer"
-            onClick={handleInteraction}
-        >
-            {(isDesktop && shouldLoad && item.liveUrl) ? (
-                 <div className={`transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-                      style={{
-                          width: `${DESKTOP_WIDTH}px`,
-                          height: `${DESKTOP_HEIGHT}px`,
-                          transform: `scale(${scale})`,
-                          transformOrigin: 'top left',
-                      }}
-                 >
-                    <iframe 
-                        src={item.liveUrl}
-                        title={item.title}
-                        className="w-full h-full border-0 pointer-events-none bg-white"
-                        loading="lazy"
-                        onLoad={handleLoad}
-                        sandbox="allow-scripts allow-same-origin" 
-                    />
-                 </div>
-            ) : null}
-
-            {(!isLoaded || !shouldLoad || !isDesktop) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-charcoal/10 text-charcoal/50 z-0">
-                    <span className="loading-spinner">Loading Preview...</span>
-                </div>
-            )}
-             
-             {/* Hover Overlay with Button */}
-             <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px] z-20 ${isMobileActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                <a 
-                    href={item.liveUrl || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 bg-neon text-charcoal font-bold py-3 px-8 rounded-full uppercase tracking-wider hover:bg-white hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
-                    onClick={(e) => e.stopPropagation()} // Prevent closing on click
-                >
-                    <span>{btnText}</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </a>
-             </div>
-        </div>
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+        }
+      },
+      { rootMargin: '80px 0px' }
     );
-};
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
-export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, visitLink, items }) => {
-    const pathRefs = useRef<(SVGPathElement | null)[]>([]);
-    const sectionRef = useRef<HTMLElement | null>(null);
-    const [canAnimate, setCanAnimate] = useState(false);
-    const [isInView, setIsInView] = useState(false);
+  const autoplayEnabled = canAutoplay && shouldLoad;
+  const playbackEnabled = autoplayEnabled && isVisible;
 
-    useEffect(() => {
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const desktop = window.matchMedia('(min-width: 768px)');
-        const update = () => setCanAnimate(!reduceMotion.matches && desktop.matches);
-        update();
+  useEffect(() => {
+    if (item.id === '7') {
+      setShouldLoad(true);
+    }
+  }, [item.id]);
 
-        if (reduceMotion.addEventListener) {
-            reduceMotion.addEventListener('change', update);
-            desktop.addEventListener('change', update);
-        } else {
-            reduceMotion.addListener(update);
-            desktop.addListener(update);
-        }
+  useEffect(() => {
+    const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
+    if (!videos.length) return;
+    if (!playbackEnabled) {
+      videos.forEach((video) => video.pause());
+      return;
+    }
+    videos.forEach((video) => {
+      const playPromise = video.play();
+      if (playPromise) {
+        playPromise.catch(() => undefined);
+      }
+    });
+  }, [isVisible, playbackEnabled]);
 
-        return () => {
-            if (reduceMotion.removeEventListener) {
-                reduceMotion.removeEventListener('change', update);
-                desktop.removeEventListener('change', update);
-            } else {
-                reduceMotion.removeListener(update);
-                desktop.removeListener(update);
-            }
-        };
-    }, []);
+  const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!allowMotion || !hasHover) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 14;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 10;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    rafRef.current = requestAnimationFrame(() => {
+      setParallax({ x, y });
+    });
+  };
 
-    useEffect(() => {
-        if (!sectionRef.current) return;
-        const observer = new IntersectionObserver(
-            ([entry]) => setIsInView(entry.isIntersecting),
-            { rootMargin: '200px' }
-        );
-        observer.observe(sectionRef.current);
-        return () => observer.disconnect();
-    }, []);
+  const handlePointerEnter = () => {
+    if (!hasHover) return;
+    setIsHover(true);
+  };
 
-    useEffect(() => {
-        if (!canAnimate || !isInView) return;
+  const handlePointerLeave = () => {
+    setIsHover(false);
+    setParallax({ x: 0, y: 0 });
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+  };
 
-        let animationFrameId: number;
-        let time = 0;
+  const motionX = allowMotion ? parallax.x : 0;
+  const motionY = allowMotion ? parallax.y : 0;
+  const motionEnabled = allowMotion && hasHover;
+  const desktopTransform = `translate3d(${motionEnabled ? motionX : 0}px, ${motionEnabled ? motionY + (isHover ? -8 : 0) : 0}px, 0) scale(${isHover && motionEnabled ? 1.02 : 1})`;
+  const mobileTransform = `translate3d(${motionEnabled ? motionX * -1.1 : 0}px, ${motionEnabled ? motionY * -1.1 + (isHover ? 6 : 0) : 0}px, 0) scale(${isHover && motionEnabled ? 1.03 : 1})`;
+  const desktopCardClass = `relative overflow-hidden rounded-3xl border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/40 self-center shadow-[0_24px_70px_rgba(10,10,10,0.2)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:shadow-[0_55px_140px_rgba(10,10,10,0.5)]`;
+  const mobileCardClass = `w-full md:w-full overflow-hidden rounded-3xl border border-charcoal/10 dark:border-white/10 bg-white/80 dark:bg-charcoal/60 self-center shadow-[0_18px_50px_rgba(10,10,10,0.25)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:shadow-[0_45px_110px_rgba(10,10,10,0.45)]`;
+  const desktopVideoClass = `w-full h-full aspect-[16/10] object-cover transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]`;
+  const mobileVideoClass = `w-full h-full aspect-[9/16] object-cover transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]`;
 
-        const animate = () => {
-             time += 0.005; // Gentle speed
-             
-             items.forEach((_, index) => {
-                 if (index === items.length - 1) return;
-                 
-                 const isEven = index % 2 === 0;
-                 // Base control points
-                 const baseCp1x = isEven ? 37.5 : 62.5;
-                 const baseCp2x = isEven ? 62.5 : 37.5;
-                 
-                 // Add sine wave motion
-                 // Phase shift per item for flowing effect
-                 const offset1 = Math.sin(time + index) * 10;
-                 const offset2 = Math.cos(time + index * 0.5) * 10;
-                 
-                 const cp1x = baseCp1x + offset1;
-                 const cp2x = baseCp2x + offset2;
-
-                 const d = isEven 
-                    ? `M 37.5 0 C ${cp1x} 50, ${cp2x} 50, 62.5 100` 
-                    : `M 62.5 0 C ${cp1x} 50, ${cp2x} 50, 37.5 100`;
-
-                 const p1 = pathRefs.current[index * 3 + 0];
-                 const p2 = pathRefs.current[index * 3 + 1];
-                 const p3 = pathRefs.current[index * 3 + 2];
-                 
-                 if (p1) p1.setAttribute('d', d);
-                 if (p2) p2.setAttribute('d', d);
-                 if (p3) p3.setAttribute('d', d);
-             });
-
-             animationFrameId = requestAnimationFrame(animate);
-        };
-
-        animate();
-
-        return () => {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        };
-    }, [items, canAnimate, isInView]);
+  const hideOnMobile = hideMobileVideos && !hasHover;
 
   return (
-    <section ref={sectionRef} className="py-24 bg-transparent relative transition-colors duration-500 overflow-visible w-full">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <Reveal variant="fade-down" width="100%">
-            <div className="flex flex-col items-end mb-24 text-right">
-                <div className="backdrop-blur-sm rounded-lg mb-4">
-                    <RollingText 
-                    text={title + "."}
-                    as="h2"
-                    className="text-4xl md:text-6xl font-display font-bold text-charcoal dark:text-white tracking-tighter text-right justify-end"
-                    />
-                </div>
-                <p className="max-w-2xl text-lg md:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed">
+    <div
+      ref={containerRef}
+      className={`portfolio-card ${isVisible ? 'portfolio-card--active' : ''} ${hideOnMobile ? 'hidden' : ''}`}
+    >
+      <div
+        className="relative grid gap-6 md:gap-10 md:grid-cols-[1.05fr_0.55fr] items-center"
+        onMouseMove={handlePointerMove}
+        onMouseEnter={handlePointerEnter}
+        onMouseLeave={handlePointerLeave}
+      >
+        <div className={desktopCardClass} style={{ transform: desktopTransform }}>
+          <div className="portfolio-scanline absolute inset-0" />
+          {shouldLoad ? (
+            <video
+              ref={desktopVideoRef}
+              src={item.videoDesktopUrl}
+              muted
+              loop
+              playsInline
+              preload={item.id === '7' ? 'auto' : 'none'}
+              autoPlay={autoplayEnabled && isVisible}
+              className={desktopVideoClass}
+            />
+          ) : (
+            <div className={desktopVideoClass} />
+          )}
+        </div>
+
+        <div className={mobileCardClass} style={{ transform: mobileTransform }}>
+          <div className="portfolio-scanline absolute inset-0" />
+          {shouldLoad ? (
+            <video
+              ref={mobileVideoRef}
+              src={item.videoMobileUrl}
+              muted
+              loop
+              playsInline
+              preload={item.id === '7' ? 'auto' : 'none'}
+              autoPlay={autoplayEnabled && isVisible}
+              className={mobileVideoClass}
+            />
+          ) : (
+            <div className={mobileVideoClass} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DividerSnakeText: React.FC<{ direction: 'left' | 'right' }> = ({ direction }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const easingRef = useRef<number | null>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [allowMotion, setAllowMotion] = useState(true);
+  const [isActive, setIsActive] = useState(false);
+  const targetRef = useRef(0);
+  const [metrics, setMetrics] = useState({ viewport: 0, text: 0 });
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setAllowMotion(!reduceMotion.matches);
+    update();
+    if (reduceMotion.addEventListener) {
+      reduceMotion.addEventListener('change', update);
+      return () => reduceMotion.removeEventListener('change', update);
+    }
+    reduceMotion.addListener(update);
+    return () => reduceMotion.removeListener(update);
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsActive(entry.isIntersecting);
+      },
+      { rootMargin: '200px 0px' }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isActive) return;
+    const updateTarget = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewport = window.innerHeight;
+      const startOffset = viewport * 0.35;
+      const total = rect.height + viewport + startOffset;
+      targetRef.current = Math.min(Math.max((viewport + startOffset - rect.top) / total, 0), 1);
+    };
+    const handleScroll = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      rafRef.current = requestAnimationFrame(updateTarget);
+    };
+    updateTarget();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive || !allowMotion) {
+      setProgress(targetRef.current);
+      return;
+    }
+    const animate = () => {
+      setProgress((prev) => {
+        const next = prev + (targetRef.current - prev) * 0.01;
+        return Math.abs(next - targetRef.current) < 0.001 ? targetRef.current : next;
+      });
+      easingRef.current = requestAnimationFrame(animate);
+    };
+    easingRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (easingRef.current) {
+        cancelAnimationFrame(easingRef.current);
+      }
+    };
+  }, [isActive, allowMotion]);
+
+  useEffect(() => {
+    const updateMetrics = () => {
+      const viewport = window.innerWidth;
+      const text = textRef.current?.getBoundingClientRect().width ?? 0;
+      setMetrics({ viewport, text });
+    };
+    updateMetrics();
+    window.addEventListener('resize', updateMetrics);
+    let observer: ResizeObserver | null = null;
+    if (textRef.current && 'ResizeObserver' in window) {
+      observer = new ResizeObserver(updateMetrics);
+      observer.observe(textRef.current);
+    }
+    return () => {
+      window.removeEventListener('resize', updateMetrics);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, []);
+
+  const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+  const halfTravel = (metrics.viewport + metrics.text) / 2;
+  const start = halfTravel;
+  const end = -halfTravel;
+  const translateX = allowMotion
+    ? direction === 'right'
+      ? start + (end - start) * eased
+      : end + (start - end) * eased
+    : 0;
+
+  return (
+    <div
+      ref={containerRef}
+      className="hidden md:block relative h-32 md:h-40 overflow-hidden w-screen left-1/2 -translate-x-1/2"
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          ref={textRef}
+          className="font-display font-bold uppercase tracking-[0.35em] text-charcoal/30 dark:text-white/30 text-[clamp(48px,8vw,140px)] whitespace-nowrap"
+          style={{ transform: `translate3d(${translateX}px, 0, 0)` }}
+        >
+          INTERPHASE.ART
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, items }) => {
+  const [hideMobileVideos, setHideMobileVideos] = useState(false);
+
+  return (
+    <section className="py-24 bg-transparent relative transition-colors duration-500 overflow-visible w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="relative rounded-[36px] border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/30 overflow-hidden mb-24">
+          <div className="relative z-10 grid gap-10 md:grid-cols-[1.05fr_0.95fr] items-center p-8 md:p-12">
+            <div className="space-y-6">
+              <RollingText
+                text={title + "."}
+                as="h2"
+                className="text-4xl md:text-6xl font-display font-bold text-charcoal dark:text-white tracking-tighter"
+              />
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 font-light leading-relaxed">
                 {subtitle}
-                </p>
+              </p>
+              <button
+                type="button"
+                onClick={() => setHideMobileVideos((prev) => !prev)}
+                className="md:hidden inline-flex items-center gap-2 px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/10 bg-white/80 dark:bg-charcoal/60 text-xs uppercase tracking-[0.25em] text-charcoal/70 dark:text-white/70 transition-all duration-300 hover:text-brown dark:hover:text-neon hover:border-brown/40 dark:hover:border-neon/40"
+              >
+                {hideMobileVideos ? 'Показать видео' : 'Скрыть видео'}
+              </button>
+              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-charcoal/60 dark:text-white/60">
+                <span className="px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/15 backdrop-blur-sm">
+                  Visual Systems
+                </span>
+                <span className="px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/15 backdrop-blur-sm">
+                  Motion Preview
+                </span>
+              </div>
             </div>
-        </Reveal>
+            <div className="relative h-[300px] md:h-[360px]">
+              <div className="portfolio-orbit portfolio-orbit-lg" />
+              <div className="portfolio-orbit portfolio-orbit-md" />
+              <div className="portfolio-orbit portfolio-orbit-sm" />
+              <div className="portfolio-core" />
+              <div className="portfolio-spark" style={{ top: '12%', left: '20%' }} />
+              <div className="portfolio-spark" style={{ top: '30%', left: '75%' }} />
+              <div className="portfolio-spark" style={{ top: '58%', left: '62%' }} />
+              <div className="portfolio-spark" style={{ top: '72%', left: '28%' }} />
+              <div className="portfolio-spark" style={{ top: '45%', left: '45%' }} />
+            </div>
+          </div>
+        </div>
 
-        <div className="flex flex-col gap-12 md:gap-0 relative pb-24">
-            {items.map((item, index) => {
-                const isEven = index % 2 === 0; // Left
-                const isLast = index === items.length - 1;
-                
-                return (
-                <div key={item.id} className="relative w-full flex flex-col">
-                    {/* Item Container */}
-                    <div className={`w-full md:w-[75%] relative z-20 ${isEven ? 'self-start md:mr-auto' : 'self-end md:ml-auto'}`}>
-                        <Reveal delay={index * 100} variant={isEven ? "fade-right" : "fade-left"} duration={1000} width="100%">
-                            <div className="flex flex-col gap-6">
-                                {/* Preview Window */}
-                                <div className="group relative overflow-hidden rounded-xl aspect-[16/10] border-2 border-charcoal/10 dark:border-white/10 hover:border-neon dark:hover:border-neon transition-all duration-500 shadow-2xl hover:shadow-[0_0_40px_rgba(204,255,0,0.3)] hover:-translate-y-2 bg-charcoal/5 active:scale-[0.98]">
-                                    <ProjectPreview item={item} visitLink={visitLink} />
-                                </div>
-
-                                {/* Mobile Button */}
-                                <div className="md:hidden w-full mt-2">
-                                     <a 
-                                        href={item.liveUrl || '#'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full bg-charcoal dark:bg-white text-white dark:text-charcoal font-bold py-3 px-6 rounded-lg uppercase tracking-wider text-center flex items-center justify-center gap-2"
-                                    >
-                                        <span>{visitLink || "СМОТРЕТЬ САЙТ"}</span>
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                    </a>
-                                </div>
-
-                                {/* Description Block (Now Outside) */}
-                                <div className={`flex flex-col ${isEven ? 'items-start text-left' : 'items-end text-right'}`}>
-                                    <span className="text-sm font-bold uppercase tracking-wider mb-2 text-brown dark:text-neon">
-                                        {item.category}
-                                    </span>
-                                    <h3 className="text-2xl md:text-4xl font-display font-bold text-charcoal dark:text-white mb-3">
-                                        {item.title}
-                                    </h3>
-                                    {item.description && (
-                                        <p className="text-gray-600 dark:text-gray-400 text-base md:text-lg max-w-2xl leading-relaxed">
-                                            {item.description}
-                                        </p>
-                                    )}
-                                </div>
+        <div className="flex flex-col gap-2 md:gap-6 pb-24">
+          {items.map((item, index) => {
+            const isEven = index % 2 === 0;
+            return (
+              <React.Fragment key={item.id}>
+                <div className="relative group py-6 md:py-8">
+                  <div className="relative w-full">
+                    <div className="relative grid gap-10 md:grid-cols-12 items-center rounded-[36px] px-4 sm:px-6 lg:px-10 py-10 md:py-16">
+                      <div className={`md:col-span-8 order-2 ${isEven ? 'md:order-1' : 'md:order-2'}`}>
+                        <ProjectMedia item={item} hideMobileVideos={hideMobileVideos} />
+                      </div>
+                      <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>
+                        <div className="transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-2">
+                          <Reveal variant={isEven ? 'fade-left' : 'fade-right'} width="100%" duration={900}>
+                            <div className="space-y-5">
+                              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/60 text-xs uppercase tracking-[0.25em] text-charcoal/70 dark:text-white/70">
+                                {item.category}
+                              </div>
+                              <h3 className="text-3xl md:text-4xl font-display font-bold text-charcoal dark:text-white">
+                                {item.title}
+                              </h3>
+                              {item.description && (
+                                <p className="text-gray-600 dark:text-gray-300 text-base md:text-lg leading-relaxed">
+                                  {item.description}
+                                </p>
+                              )}
                             </div>
-                        </Reveal>
-                    </div>
-
-                    {/* Connector Chain to Next Item */}
-                    {!isLast && (
-                        <div className="relative h-[400px] w-full pointer-events-none overflow-visible -mt-64 -mb-32 z-0 hidden md:block">
-                            <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <defs>
-                                    <linearGradient id={`ribbon-gradient-${index}`} gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" style={{ stopColor: 'var(--ribbon-from)', transition: 'stop-color 0.5s' }} /> 
-                                        <stop offset="100%" style={{ stopColor: 'var(--ribbon-to)', transition: 'stop-color 0.5s' }} />
-                                    </linearGradient>
-                                    <filter id={`ribbon-glow-${index}`} x="-50%" y="-50%" width="200%" height="200%">
-                                        <feGaussianBlur stdDeviation="4" result="blur" />
-                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                    </filter>
-                                </defs>
-                                
-                                {/* Glow Layer */}
-                                <path 
-                                    ref={(el) => { pathRefs.current[index * 3 + 0] = el }}
-                                    d={isEven 
-                                        ? "M 37.5 0 C 37.5 50, 62.5 50, 62.5 100" 
-                                        : "M 62.5 0 C 62.5 50, 37.5 50, 37.5 100"}
-                                    stroke={`url(#ribbon-gradient-${index})`}
-                                    strokeWidth="12"
-                                    fill="none"
-                                    className="opacity-20"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-
-                                {/* Core Ribbon */}
-                                <path 
-                                    ref={(el) => { pathRefs.current[index * 3 + 1] = el }}
-                                    d={isEven 
-                                        ? "M 37.5 0 C 37.5 50, 62.5 50, 62.5 100" 
-                                        : "M 62.5 0 C 62.5 50, 37.5 50, 37.5 100"}
-                                    stroke={`url(#ribbon-gradient-${index})`}
-                                    strokeWidth="3"
-                                    fill="none"
-                                    className="opacity-60"
-                                    vectorEffect="non-scaling-stroke"
-                                    strokeLinecap="round"
-                                />
-
-                                {/* Animated Energy Flow */}
-                                <path 
-                                    ref={(el) => { pathRefs.current[index * 3 + 2] = el }}
-                                    d={isEven 
-                                        ? "M 37.5 0 C 37.5 50, 62.5 50, 62.5 100" 
-                                        : "M 62.5 0 C 62.5 50, 37.5 50, 37.5 100"}
-                                    stroke="var(--ribbon-from)"
-                                    strokeWidth="1"
-                                    fill="none"
-                                    strokeDasharray="20 30"
-                                    className="animate-dash opacity-50 mix-blend-overlay"
-                                    vectorEffect="non-scaling-stroke"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
+                          </Reveal>
                         </div>
-                    )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-            )})}
+                {index < items.length - 1 && (
+                  <>
+                    <DividerSnakeText direction={isEven ? 'right' : 'left'} />
+                    <div className="md:hidden h-px w-full bg-charcoal/10 dark:bg-white/10" />
+                  </>
+                )}
+              </React.Fragment>
+            );
+          })}
         </div>
 
         {outro && (
-            <Reveal variant="fade-up" width="100%">
-                <div className="text-center mt-12 md:mt-24">
-                    <p className="text-lg md:text-2xl font-bold text-charcoal dark:text-white max-w-4xl mx-auto leading-relaxed">
-                        {outro}
-                    </p>
-                </div>
-            </Reveal>
+          <Reveal variant="fade-up" width="100%">
+            <div className="text-center mt-12 md:mt-24">
+              <p className="text-lg md:text-2xl font-bold text-charcoal dark:text-white max-w-4xl mx-auto leading-relaxed">
+                {outro}
+              </p>
+            </div>
+          </Reveal>
         )}
-       </div>
+      </div>
     </section>
   );
 };

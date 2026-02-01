@@ -3,14 +3,15 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BlogPost } from '../../types';
 import { blogService } from '../../services/blogService';
-import { ArrowLeft, Save, Image as ImageIcon, Bold, Italic, Link as LinkIcon, Upload } from 'lucide-react';
+import { ArrowLeft, Save, Image as ImageIcon, Bold, Italic, Link as LinkIcon, Upload, Quote } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 
 export const AdminBlogEditor: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const lastSelectionRef = useRef<Range | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<BlogPost>>({
     title: '',
@@ -21,6 +22,7 @@ export const AdminBlogEditor: React.FC = () => {
     readTime: '5 min',
     author: 'Interphase'
   });
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
 
   const [showPreview, setShowPreview] = useState(false);
 
@@ -53,12 +55,14 @@ export const AdminBlogEditor: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const html = editorRef.current ? editorRef.current.innerHTML : formData.content || '';
+    const payload = { ...formData, content: html };
 
     try {
       if (id) {
-        await blogService.updatePost(id, formData);
+        await blogService.updatePost(id, payload);
       } else {
-        await blogService.createPost(formData as Omit<BlogPost, 'id' | 'date'>);
+        await blogService.createPost(payload as Omit<BlogPost, 'id' | 'date'>);
       }
       navigate('/admin/dashboard');
     } catch (error) {
@@ -74,60 +78,285 @@ export const AdminBlogEditor: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const insertFormat = (tag: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = formData.content || '';
-    const selectedText = text.substring(start, end);
+  const normalizeContent = (value?: string) => {
+    if (!value) return '';
+    if (value.includes('<')) return value;
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    const paragraphs = trimmed
+      .split(/\n{2,}/)
+      .map(block => block.split('\n').map(escapeHtml).join('<br/>'));
+    return paragraphs.map(p => `<p>${p}</p>`).join('');
+  };
 
-    let newText;
-    let newCursorPos;
+  const syncEditorHtml = () => {
+    if (!editorRef.current) return;
+    const html = editorRef.current.innerHTML;
+    setFormData(prev => ({ ...prev, content: html }));
+  };
 
-    if (tag === 'br') {
-        // Line break
-        newText = text.substring(0, start) + '<br/>\n' + text.substring(end);
-        newCursorPos = start + 6;
-    } else if (tag === 'h3') {
-        // Header
-        const headerText = selectedText || 'Header';
-        newText = text.substring(0, start) + `\n<h3>${headerText}</h3>\n` + text.substring(end);
-        newCursorPos = start + headerText.length + 10;
-    } else if (tag === 'p') {
-        // Paragraph
-        const pText = selectedText || 'Paragraph text...';
-        newText = text.substring(0, start) + `\n<p>${pText}</p>\n` + text.substring(end);
-        newCursorPos = start + pText.length + 8;
-    } else if (selectedText) {
-      // Wrap selected text (bold, italic)
-      newText = text.substring(0, start) + `<${tag}>` + selectedText + `</${tag}>` + text.substring(end);
-      newCursorPos = start + selectedText.length + tag.length * 2 + 5; 
-    } else {
-      // Insert empty tags
-      const tagString = `<${tag}></${tag}>`;
-      newText = text.substring(0, start) + tagString + text.substring(end);
-      newCursorPos = start + tag.length + 2; 
+  useEffect(() => {
+    if (!editorRef.current || isEditorFocused) return;
+    const normalized = normalizeContent(formData.content || '');
+    if (editorRef.current.innerHTML !== normalized) {
+      editorRef.current.innerHTML = normalized;
     }
-    
-    setFormData(prev => ({ ...prev, content: newText }));
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
+  }, [formData.content, isEditorFocused]);
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!editorRef.current) return;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+      const range = selection.getRangeAt(0);
+      if (editorRef.current.contains(range.commonAncestorContainer)) {
+        lastSelectionRef.current = range.cloneRange();
+      }
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
+
+  const handleEditorKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      document.execCommand('insertHTML', false, '<p><br/></p>');
+      syncEditorHtml();
+    } else if (event.key === 'Enter' && event.shiftKey) {
+      event.preventDefault();
+      document.execCommand('insertHTML', false, '<br/>');
+      syncEditorHtml();
+    }
+  };
+
+  const handleEditorMouseUp = () => {
+    const range = getEditorRange();
+    if (range) {
+      lastSelectionRef.current = range.cloneRange();
+    }
+  };
+
+  const handleEditorKeyUp = () => {
+    const range = getEditorRange();
+    if (range) {
+      lastSelectionRef.current = range.cloneRange();
+    }
+  };
+
+  const handleEditorPaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    const text = event.clipboardData.getData('text/plain');
+    if (!text) return;
+    event.preventDefault();
+    const blocks = text
+      .replace(/\r\n/g, '\n')
+      .split(/\n{2,}/)
+      .map(block => block.split('\n').map(escapeHtml).join('<br/>'));
+    const html = blocks.filter(Boolean).map(block => `<p>${block}</p>`).join('');
+    insertHtmlAtCursor(html);
+  };
+
+  const getEditorRange = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (editorRef.current?.contains(range.commonAncestorContainer)) {
+        return range;
+      }
+    }
+    if (lastSelectionRef.current && editorRef.current?.contains(lastSelectionRef.current.commonAncestorContainer)) {
+      return lastSelectionRef.current;
+    }
+    return null;
+  };
+
+  const setSelectionRange = (range: Range) => {
+    const selection = window.getSelection();
+    if (!selection) return;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    lastSelectionRef.current = range.cloneRange();
+  };
+
+  const createRangeAtEnd = () => {
+    if (!editorRef.current) return null;
+    const range = document.createRange();
+    range.selectNodeContents(editorRef.current);
+    range.collapse(false);
+    return range;
+  };
+
+  const insertHtmlAtCursor = (html: string) => {
+    const range = getEditorRange() ?? createRangeAtEnd();
+    if (!range) {
+      return;
+    }
+    range.deleteContents();
+    const fragment = range.createContextualFragment(html);
+    const lastNode = fragment.lastChild;
+    range.insertNode(fragment);
+    if (lastNode) {
+      range.setStartAfter(lastNode);
+      range.collapse(true);
+      setSelectionRange(range);
+    }
+    syncEditorHtml();
+  };
+
+  const normalizeEditorBlocks = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const blockTags = new Set(['P', 'DIV', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'PRE', 'TABLE', 'IMG', 'FIGURE', 'HR']);
+    const nodes = Array.from(editor.childNodes) as ChildNode[];
+    let wrapper: HTMLParagraphElement | null = null;
+    const ensureWrapper = (beforeNode?: ChildNode) => {
+      if (!wrapper) {
+        wrapper = document.createElement('p');
+        if (beforeNode) {
+          editor.insertBefore(wrapper, beforeNode);
+        } else {
+          editor.appendChild(wrapper);
+        }
+      }
+      return wrapper;
+    };
+    const closeWrapper = () => {
+      if (wrapper && !wrapper.childNodes.length) {
+        wrapper.appendChild(document.createElement('br'));
+      }
+      wrapper = null;
+    };
+    nodes.forEach((node: ChildNode) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        if (blockTags.has(el.tagName)) {
+          closeWrapper();
+          return;
+        }
+        const target = ensureWrapper(node);
+        target.appendChild(node);
+        return;
+      }
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent ?? '';
+        if (!text.trim()) {
+          if (wrapper) {
+            wrapper.appendChild(node);
+          } else {
+            editor.removeChild(node);
+          }
+          return;
+        }
+        const target = ensureWrapper(node);
+        target.appendChild(node);
+        return;
+      }
+      const target = ensureWrapper(node);
+      target.appendChild(node);
+    });
+    closeWrapper();
+    if (!editor.childNodes.length) {
+      editor.innerHTML = '<p><br/></p>';
+    }
+  };
+
+  const replaceCurrentBlock = (tag: string, currentRange?: Range | null) => {
+    const baseRange = currentRange ?? getEditorRange();
+    const anchorNode = baseRange?.startContainer ?? null;
+    if (!anchorNode) {
+      return false;
+    }
+    const node = anchorNode instanceof Element ? anchorNode : anchorNode.parentElement;
+    const block = node?.closest('p,div,blockquote,h1,h2,h3,h4,h5,h6');
+    if (!block || !editorRef.current?.contains(block) || block === editorRef.current) {
+      return false;
+    }
+    const replacement = document.createElement(tag);
+    replacement.innerHTML = block.innerHTML;
+    block.replaceWith(replacement);
+    const newRange = document.createRange();
+    newRange.selectNodeContents(replacement);
+    newRange.collapse(false);
+    setSelectionRange(newRange);
+    syncEditorHtml();
+    return true;
+  };
+
+  const applyBlockTag = (tag: string, providedRange?: Range | null) => {
+    normalizeEditorBlocks();
+    const range = getEditorRange() ?? createRangeAtEnd();
+    if (!range) return;
+    setSelectionRange(range);
+    const selectedText = range.toString();
+    if (selectedText.trim()) {
+      const contents = range.extractContents();
+      const wrapper = document.createElement(tag);
+      wrapper.appendChild(contents);
+      range.insertNode(wrapper);
+      const after = document.createRange();
+      after.setStartAfter(wrapper);
+      after.collapse(true);
+      setSelectionRange(after);
+      syncEditorHtml();
+      return;
+    }
+    const replaced = replaceCurrentBlock(tag, range);
+    if (replaced) return;
+    const anchorNode = range.startContainer;
+    if (anchorNode.nodeType === Node.TEXT_NODE && anchorNode.parentNode === editorRef.current) {
+      const wrapper = document.createElement(tag);
+      const textNode = anchorNode as Text;
+      const parent = textNode.parentNode;
+      if (parent) {
+        wrapper.appendChild(textNode);
+        parent.insertBefore(wrapper, textNode);
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        newRange.collapse(false);
+        setSelectionRange(newRange);
+        syncEditorHtml();
+        return;
+      }
+    }
+    insertHtmlAtCursor(`<${tag}><br/></${tag}>`);
+  };
+
+  const insertFormat = (tag: string) => {
+    if (!editorRef.current) return;
+    const range = getEditorRange();
+    if (range) {
+      setSelectionRange(range);
+    }
+    editorRef.current.focus();
+    if (tag === 'b') {
+      document.execCommand('bold');
+      syncEditorHtml();
+    } else if (tag === 'i') {
+      document.execCommand('italic');
+      syncEditorHtml();
+    } else if (tag === 'h3' || tag === 'p' || tag === 'blockquote') {
+      applyBlockTag(tag, null);
+    }
+  };
+
+  const handleToolbarMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const range = getEditorRange();
+    if (range) {
+      lastSelectionRef.current = range.cloneRange();
+    }
   };
 
   const insertLink = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = formData.content || '';
-    const selectedText = text.substring(start, end);
-
     const url = prompt('Enter URL:', 'https://');
     if (!url) return;
 
@@ -137,46 +366,21 @@ export const AdminBlogEditor: React.FC = () => {
         validUrl = 'https://' + url;
     }
 
+    const selectedText = getEditorRange()?.toString() || '';
     const linkText = selectedText || prompt('Enter link text:', 'link') || 'link';
-    const textToInsert = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer" class="text-brown dark:text-neon hover:underline">${linkText}</a>`;
-
-    const newText = text.substring(0, start) + textToInsert + text.substring(end);
-    setFormData(prev => ({ ...prev, content: newText }));
-    
-    setTimeout(() => {
-      textarea.focus();
-      const newPos = start + textToInsert.length;
-      textarea.setSelectionRange(newPos, newPos);
-    }, 0);
+    const textToInsert = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer" class="text-brown dark:text-neon hover:underline">${escapeHtml(linkText)}</a>`;
+    insertHtmlAtCursor(textToInsert);
   };
 
   const insertImageUrl = () => {
     const url = prompt('Image URL (must start with http/https):');
     if(url) {
        if (url.startsWith('http')) {
-         insertAtCursor(`\n<img src="${url}" alt="Image" class="w-full h-auto rounded-2xl my-8 shadow-lg" loading="lazy" />\n`);
+         insertHtmlAtCursor(`<img src="${url}" alt="Image" class="w-full h-auto rounded-2xl my-8 shadow-lg" loading="lazy" />`);
        } else {
          alert('Please enter a valid URL starting with http:// or https://');
        }
     }
-  };
-
-  const insertAtCursor = (textToInsert: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = formData.content || '';
-    
-    const newText = text.substring(0, start) + textToInsert + text.substring(end);
-    
-    setFormData(prev => ({ ...prev, content: newText }));
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + textToInsert.length, start + textToInsert.length);
-    }, 0);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,8 +392,9 @@ export const AdminBlogEditor: React.FC = () => {
       return;
     }
 
-    const uploadingText = ' [Uploading image...] ';
-    insertAtCursor(uploadingText);
+    const uploadingToken = `uploading-${Date.now()}`;
+    const uploadingText = `<span data-upload="${uploadingToken}">Uploading image...</span>`;
+    insertHtmlAtCursor(uploadingText);
     
     try {
       const fileExt = file.name.split('.').pop();
@@ -207,18 +412,29 @@ export const AdminBlogEditor: React.FC = () => {
       const { data } = supabase.storage.from('blog-images').getPublicUrl(filePath);
       
       // Replace placeholder with actual image tag
-      const textarea = textareaRef.current;
-      if (textarea && formData.content) {
-        const currentContent = formData.content;
-        const newContent = currentContent.replace(uploadingText, `\n<img src="${data.publicUrl}" alt="Blog Image" class="w-full h-auto rounded-2xl my-8 shadow-lg" loading="lazy" />\n`);
-        setFormData(prev => ({ ...prev, content: newContent }));
+      const currentContent = editorRef.current?.innerHTML || formData.content || '';
+      const newContent = currentContent.replace(
+        new RegExp(`<span data-upload="${uploadingToken}">[\\s\\S]*?<\\/span>`),
+        `<img src="${data.publicUrl}" alt="Blog Image" class="w-full h-auto rounded-2xl my-8 shadow-lg" loading="lazy" />`
+      );
+      if (editorRef.current) {
+        editorRef.current.innerHTML = newContent;
       }
+      setFormData(prev => ({ ...prev, content: newContent }));
 
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Upload failed. Please ensure you have created a public bucket named "blog-images" in Supabase.');
       // Remove placeholder
-      setFormData(prev => ({ ...prev, content: (prev.content || '').replace(uploadingText, '') }));
+      const currentContent = editorRef.current?.innerHTML || formData.content || '';
+      const cleaned = currentContent.replace(
+        new RegExp(`<span data-upload="${uploadingToken}">[\\s\\S]*?<\\/span>`),
+        ''
+      );
+      if (editorRef.current) {
+        editorRef.current.innerHTML = cleaned;
+      }
+      setFormData(prev => ({ ...prev, content: cleaned }));
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
@@ -323,30 +539,30 @@ export const AdminBlogEditor: React.FC = () => {
               
               {/* Editor Toolbar */}
               <div className="flex items-center gap-2 mb-2 p-2 bg-gray-50 dark:bg-charcoal/50 rounded-lg border border-gray-200 dark:border-gray-700 flex-wrap">
-                 <button type="button" onClick={() => insertFormat('b')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Bold">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('b')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Bold">
                    <Bold size={18} className="text-charcoal dark:text-white" />
                  </button>
-                 <button type="button" onClick={() => insertFormat('i')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Italic">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('i')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Italic">
                    <Italic size={18} className="text-charcoal dark:text-white" />
                  </button>
-                 <button type="button" onClick={() => insertFormat('h3')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Header">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('h3')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Header">
                    H3
                  </button>
-                 <button type="button" onClick={() => insertFormat('p')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Paragraph">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('p')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Paragraph">
                    P
                  </button>
-                 <button type="button" onClick={() => insertFormat('br')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Line Break">
-                   BR
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('blockquote')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Quote">
+                   <Quote size={18} className="text-charcoal dark:text-white" />
                  </button>
                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                 <button type="button" onClick={insertLink} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Link">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={insertLink} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Link">
                    <LinkIcon size={18} className="text-charcoal dark:text-white group-hover:text-blue-500 transition-colors" />
                  </button>
                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                 <button type="button" onClick={insertImageUrl} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Insert Image by URL">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={insertImageUrl} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Insert Image by URL">
                    <ImageIcon size={18} className="text-charcoal dark:text-white group-hover:text-green-500 transition-colors" />
                  </button>
-                 <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 bg-brown dark:bg-neon text-white dark:text-charcoal text-xs font-bold uppercase rounded ml-auto hover:opacity-90 transition-opacity">
+                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 bg-brown dark:bg-neon text-white dark:text-charcoal text-xs font-bold uppercase rounded ml-auto hover:opacity-90 transition-opacity">
                    <Upload size={14} />
                    <span>Upload Image</span>
                  </button>
@@ -362,14 +578,17 @@ export const AdminBlogEditor: React.FC = () => {
                 Tip: Use the image button to insert images. Pasting URLs directly will result in text.
               </p>
 
-              <textarea
-                ref={textareaRef}
-                name="content"
-                required
-                rows={20}
-                value={formData.content}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white font-mono text-sm"
+              <div
+                ref={editorRef}
+                contentEditable
+                onInput={syncEditorHtml}
+                onKeyDown={handleEditorKeyDown}
+                onKeyUp={handleEditorKeyUp}
+                onMouseUp={handleEditorMouseUp}
+                onPaste={handleEditorPaste}
+                onFocus={() => setIsEditorFocused(true)}
+                onBlur={() => setIsEditorFocused(false)}
+                className="min-h-[320px] w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white text-sm prose prose-sm dark:prose-invert max-w-none prose-h3:text-xl prose-h3:font-bold prose-h3:tracking-tight prose-blockquote:border-l-4 prose-blockquote:border-brown/40 dark:prose-blockquote:border-neon/40 prose-blockquote:pl-4 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300"
               />
             </div>
 
@@ -437,7 +656,7 @@ export const AdminBlogEditor: React.FC = () => {
                 )}
 
                 <div 
-                  className="prose dark:prose-invert max-w-none prose-lg prose-img:rounded-2xl prose-headings:font-display prose-a:text-brown dark:prose-a:text-neon hover:prose-a:opacity-80 transition-opacity"
+                  className="prose dark:prose-invert max-w-none prose-lg prose-img:rounded-2xl prose-headings:font-display prose-h3:tracking-tight prose-blockquote:border-l-4 prose-blockquote:border-brown/40 dark:prose-blockquote:border-neon/40 prose-blockquote:pl-4 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300 prose-a:text-brown dark:prose-a:text-neon hover:prose-a:opacity-80 transition-opacity"
                   dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400 italic">Start typing to see content...</p>' }}
                 />
               </div>

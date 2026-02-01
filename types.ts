@@ -41,9 +41,10 @@ export interface ProjectItem {
   id: string;
   title: string;
   category: string;
-  imageUrl: string;
   description?: string;
-  liveUrl?: string;
+  videoDesktopUrl: string;
+  videoMobileUrl: string;
+  imageUrl?: string;
 }
 
 export interface BlogPost {
@@ -149,6 +150,10 @@ export interface ContentDictionary {
     outro?: string;
     visitLink: string;
     items: ProjectItem[];
+  };
+  homeBlog: {
+    title: string;
+    subtitle: string;
   };
   blog: {
     title: string;

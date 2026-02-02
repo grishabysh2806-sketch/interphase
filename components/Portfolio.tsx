@@ -11,7 +11,11 @@ interface PortfolioProps {
   items: ProjectItem[];
 }
 
-const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean }> = ({ item, hideMobileVideos }) => {
+const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; preloadPriority?: boolean }> = ({
+  item,
+  hideMobileVideos,
+  preloadPriority = false
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const desktopVideoRef = useRef<HTMLVideoElement>(null);
   const mobileVideoRef = useRef<HTMLVideoElement>(null);
@@ -69,6 +73,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean }> =
 
   useEffect(() => {
     if (!containerRef.current) return;
+    const rootMargin = preloadPriority ? '1200px 0px' : '600px 0px';
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
@@ -76,20 +81,30 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean }> =
           setShouldLoad(true);
         }
       },
-      { rootMargin: '80px 0px' }
+      { rootMargin }
     );
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [preloadPriority]);
 
   const autoplayEnabled = canAutoplay && shouldLoad;
   const playbackEnabled = autoplayEnabled && isVisible;
+  const preloadValue = shouldLoad ? 'auto' : 'none';
 
   useEffect(() => {
-    if (item.id === '7') {
+    if (!shouldLoad) return;
+    const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
+    videos.forEach((video) => {
+      video.preload = 'auto';
+      video.load();
+    });
+  }, [shouldLoad]);
+
+  useEffect(() => {
+    if (preloadPriority || item.id === '7') {
       setShouldLoad(true);
     }
-  }, [item.id]);
+  }, [item.id, preloadPriority]);
 
   useEffect(() => {
     const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
@@ -164,7 +179,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean }> =
               muted
               loop
               playsInline
-              preload={item.id === '7' ? 'auto' : 'none'}
+              preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
               className={desktopVideoClass}
             />
@@ -182,7 +197,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean }> =
               muted
               loop
               playsInline
-              preload={item.id === '7' ? 'auto' : 'none'}
+              preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
               className={mobileVideoClass}
             />
@@ -329,6 +344,19 @@ const DividerSnakeText: React.FC<{ direction: 'left' | 'right' }> = ({ direction
 
 export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, items }) => {
   const [hideMobileVideos, setHideMobileVideos] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    if (mq.addEventListener) {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    }
+    mq.addListener(update);
+    return () => mq.removeListener(update);
+  }, []);
 
   return (
     <section className="py-24 bg-transparent relative transition-colors duration-500 overflow-visible w-full">
@@ -383,7 +411,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, it
                   <div className="relative w-full">
                     <div className="relative grid gap-10 md:grid-cols-12 items-center rounded-[36px] px-4 sm:px-6 lg:px-10 py-10 md:py-16">
                       <div className={`md:col-span-8 order-2 ${isEven ? 'md:order-1' : 'md:order-2'}`}>
-                        <ProjectMedia item={item} hideMobileVideos={hideMobileVideos} />
+                        <ProjectMedia item={item} hideMobileVideos={hideMobileVideos} preloadPriority={isMobile || index < 3} />
                       </div>
                       <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>
                         <div className="transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-2">

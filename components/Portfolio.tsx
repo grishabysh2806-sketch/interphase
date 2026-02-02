@@ -74,6 +74,12 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
   useEffect(() => {
     if (!containerRef.current) return;
     const rootMargin = preloadPriority ? '1200px 0px' : '600px 0px';
+    const rect = containerRef.current.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    setIsVisible(inView);
+    if (inView) {
+      setShouldLoad(true);
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
@@ -89,7 +95,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
 
   const autoplayEnabled = canAutoplay && shouldLoad;
   const playbackEnabled = autoplayEnabled && isVisible;
-  const preloadValue = shouldLoad ? 'auto' : 'none';
+  const preloadValue = shouldLoad || preloadPriority ? 'auto' : 'none';
 
   useEffect(() => {
     if (!shouldLoad) return;
@@ -120,6 +126,14 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
       }
     });
   }, [isVisible, playbackEnabled]);
+
+  const handleCanPlay = (video: HTMLVideoElement | null) => {
+    if (!video || !playbackEnabled) return;
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch(() => undefined);
+    }
+  };
 
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!allowMotion || !hasHover) return;
@@ -181,6 +195,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
               playsInline
               preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
+              onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
               className={desktopVideoClass}
             />
           ) : (
@@ -199,6 +214,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
               playsInline
               preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
+              onCanPlay={() => handleCanPlay(mobileVideoRef.current)}
               className={mobileVideoClass}
             />
           ) : (

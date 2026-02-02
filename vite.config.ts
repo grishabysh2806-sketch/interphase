@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => {
         react(),
         tailwindcss(),
       ],
+      build: {
+        chunkSizeWarningLimit: 900,
+      },
       define: {
         'process.env.VITE_TELEGRAM_API_ID': JSON.stringify(env.VITE_TELEGRAM_API_ID),
         'process.env.VITE_TELEGRAM_API_HASH': JSON.stringify(env.VITE_TELEGRAM_API_HASH),

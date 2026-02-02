@@ -179,3 +179,16 @@ export interface ContentDictionary {
   footer: FooterContent;
   privacy: PrivacyContent;
 }
+
+declare global {
+  interface ImportMetaEnv {
+    readonly VITE_SUPABASE_URL?: string;
+    readonly VITE_SUPABASE_ANON_KEY?: string;
+    readonly VITE_SUPABASE_STORAGE_URL?: string;
+    readonly VITE_MEDIA_BASE_URL?: string;
+  }
+
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
+}

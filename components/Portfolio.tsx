@@ -30,6 +30,9 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
   const [mobileReady, setMobileReady] = useState(false);
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const rafRef = useRef<number | null>(null);
+  const mediaBaseUrl =
+    (import.meta.env.VITE_MEDIA_BASE_URL as string | undefined) ||
+    (import.meta.env.VITE_SUPABASE_STORAGE_URL as string | undefined);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -172,6 +175,15 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
     markReady(true);
   };
 
+  const resolveMediaUrl = (url?: string) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    if (!mediaBaseUrl) return url;
+    const trimmedBase = mediaBaseUrl.replace(/\/$/, '');
+    const trimmedPath = url.startsWith('/') ? url.slice(1) : url;
+    return `${trimmedBase}/${trimmedPath}`;
+  };
+
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!allowMotion || !hasHover) return;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -214,6 +226,9 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%23e5e7eb'/><stop offset='100%' stop-color='%23d1d5db'/></linearGradient><rect width='1600' height='900' fill='url(%23g)'/></svg>";
   const desktopOverlayVisible = shouldLoad && !desktopReady;
   const mobileOverlayVisible = shouldLoad && !mobileReady;
+  const desktopSrc = resolveMediaUrl(item.videoDesktopUrl);
+  const mobileSrc = resolveMediaUrl(item.videoMobileUrl);
+  const posterSrc = resolveMediaUrl(item.imageUrl) ?? fallbackPoster;
 
   const hideOnMobile = hideMobileVideos && !hasHover;
 
@@ -233,13 +248,13 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
           <div className="relative">
             <video
               ref={desktopVideoRef}
-              src={item.videoDesktopUrl}
+              src={desktopSrc}
               muted
               loop
               playsInline
               preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
-              poster={item.imageUrl ?? fallbackPoster}
+              poster={posterSrc}
               onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
               onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
               onError={() => handleVideoError(setDesktopReady)}
@@ -258,13 +273,13 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
           <div className="relative">
             <video
               ref={mobileVideoRef}
-              src={item.videoMobileUrl}
+              src={mobileSrc}
               muted
               loop
               playsInline
               preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
-              poster={item.imageUrl ?? fallbackPoster}
+              poster={posterSrc}
               onLoadedMetadata={() => handleLoadedMetadata(mobileVideoRef.current, setMobileReady)}
               onCanPlay={() => handleCanPlay(mobileVideoRef.current)}
               onError={() => handleVideoError(setMobileReady)}

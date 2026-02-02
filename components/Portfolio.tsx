@@ -28,6 +28,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
   const [hasHover, setHasHover] = useState(true);
   const [desktopReady, setDesktopReady] = useState(false);
   const [mobileReady, setMobileReady] = useState(false);
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -80,12 +81,16 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
     const inView = rect.top < window.innerHeight && rect.bottom > 0;
     setIsVisible(inView);
     if (inView) {
+      setHasBeenVisible(true);
+    }
+    if (inView) {
       setShouldLoad(true);
     }
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
         if (entry.isIntersecting) {
+          setHasBeenVisible(true);
           setShouldLoad(true);
         }
       },
@@ -142,6 +147,27 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
     }
   };
 
+  const handleLoadedData = (
+    video: HTMLVideoElement | null,
+    markReady: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    markReady(true);
+    if (!video) return;
+    if (playbackEnabled) {
+      handleCanPlay(video);
+      return;
+    }
+    if (video.readyState >= 2 && video.currentTime === 0) {
+      const safeDuration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0.1;
+      const targetTime = Math.min(0.1, safeDuration);
+      try {
+        video.currentTime = targetTime;
+      } catch {
+        return;
+      }
+    }
+  };
+
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!allowMotion || !hasHover) return;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -182,13 +208,15 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
   const mobilePlaceholderClass = `${mobileVideoClass} ${placeholderGradient}`;
   const fallbackPoster =
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%23e5e7eb'/><stop offset='100%' stop-color='%23d1d5db'/></linearGradient><rect width='1600' height='900' fill='url(%23g)'/></svg>";
+  const desktopOverlayVisible = shouldLoad && !desktopReady;
+  const mobileOverlayVisible = shouldLoad && !mobileReady;
 
   const hideOnMobile = hideMobileVideos && !hasHover;
 
   return (
     <div
       ref={containerRef}
-      className={`portfolio-card ${isVisible ? 'portfolio-card--active' : ''} ${hideOnMobile ? 'hidden' : ''}`}
+      className={`portfolio-card ${hasBeenVisible ? 'portfolio-card--active' : ''} ${hideOnMobile ? 'hidden' : ''}`}
     >
       <div
         className="relative grid gap-6 md:gap-10 md:grid-cols-[1.05fr_0.55fr] items-center"
@@ -198,64 +226,50 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
       >
         <div className={desktopCardClass} style={{ transform: desktopTransform }}>
           <div className="portfolio-scanline absolute inset-0" />
-          {shouldLoad ? (
-            <div className="relative">
-              <video
-                ref={desktopVideoRef}
-                src={item.videoDesktopUrl}
-                muted
-                loop
-                playsInline
-                preload={preloadValue}
-                autoPlay={autoplayEnabled && isVisible}
-                poster={item.imageUrl ?? fallbackPoster}
-                onLoadedData={() => {
-                  setDesktopReady(true);
-                  handleCanPlay(desktopVideoRef.current);
-                }}
-                onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
-                className={`${desktopVideoClass} ${placeholderGradient}`}
-              />
-              <div
-                className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
-                  desktopReady ? 'opacity-0' : 'opacity-100'
-                }`}
-              />
-            </div>
-          ) : (
-            <div className={desktopPlaceholderClass} />
-          )}
+          <div className="relative">
+            <video
+              ref={desktopVideoRef}
+              src={item.videoDesktopUrl}
+              muted
+              loop
+              playsInline
+              preload={preloadValue}
+              autoPlay={autoplayEnabled && isVisible}
+              poster={item.imageUrl ?? fallbackPoster}
+              onLoadedData={() => handleLoadedData(desktopVideoRef.current, setDesktopReady)}
+              onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
+              className={`${desktopVideoClass} ${placeholderGradient}`}
+            />
+            <div
+              className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
+                desktopOverlayVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          </div>
         </div>
 
         <div className={mobileCardClass} style={{ transform: mobileTransform }}>
           <div className="portfolio-scanline absolute inset-0" />
-          {shouldLoad ? (
-            <div className="relative">
-              <video
-                ref={mobileVideoRef}
-                src={item.videoMobileUrl}
-                muted
-                loop
-                playsInline
-                preload={preloadValue}
-                autoPlay={autoplayEnabled && isVisible}
-                poster={item.imageUrl ?? fallbackPoster}
-                onLoadedData={() => {
-                  setMobileReady(true);
-                  handleCanPlay(mobileVideoRef.current);
-                }}
-                onCanPlay={() => handleCanPlay(mobileVideoRef.current)}
-                className={`${mobileVideoClass} ${placeholderGradient}`}
-              />
-              <div
-                className={`pointer-events-none absolute inset-0 ${mobilePlaceholderClass} transition-opacity duration-500 ${
-                  mobileReady ? 'opacity-0' : 'opacity-100'
-                }`}
-              />
-            </div>
-          ) : (
-            <div className={mobilePlaceholderClass} />
-          )}
+          <div className="relative">
+            <video
+              ref={mobileVideoRef}
+              src={item.videoMobileUrl}
+              muted
+              loop
+              playsInline
+              preload={preloadValue}
+              autoPlay={autoplayEnabled && isVisible}
+              poster={item.imageUrl ?? fallbackPoster}
+              onLoadedData={() => handleLoadedData(mobileVideoRef.current, setMobileReady)}
+              onCanPlay={() => handleCanPlay(mobileVideoRef.current)}
+              className={`${mobileVideoClass} ${placeholderGradient}`}
+            />
+            <div
+              className={`pointer-events-none absolute inset-0 ${mobilePlaceholderClass} transition-opacity duration-500 ${
+                mobileOverlayVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          </div>
         </div>
       </div>
     </div>

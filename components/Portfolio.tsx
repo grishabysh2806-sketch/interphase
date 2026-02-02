@@ -147,17 +147,17 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
     }
   };
 
-  const handleLoadedData = (
+  const handleLoadedMetadata = (
     video: HTMLVideoElement | null,
     markReady: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
     markReady(true);
     if (!video) return;
-    if (playbackEnabled) {
+    if (playbackEnabled && video.readyState >= 2) {
       handleCanPlay(video);
       return;
     }
-    if (video.readyState >= 2 && video.currentTime === 0) {
+    if (video.readyState >= 1 && video.currentTime === 0) {
       const safeDuration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0.1;
       const targetTime = Math.min(0.1, safeDuration);
       try {
@@ -166,6 +166,10 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
         return;
       }
     }
+  };
+
+  const handleVideoError = (markReady: React.Dispatch<React.SetStateAction<boolean>>) => {
+    markReady(true);
   };
 
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -236,8 +240,9 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
               preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
               poster={item.imageUrl ?? fallbackPoster}
-              onLoadedData={() => handleLoadedData(desktopVideoRef.current, setDesktopReady)}
+              onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
               onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
+              onError={() => handleVideoError(setDesktopReady)}
               className={`${desktopVideoClass} ${placeholderGradient}`}
             />
             <div
@@ -260,8 +265,9 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
               preload={preloadValue}
               autoPlay={autoplayEnabled && isVisible}
               poster={item.imageUrl ?? fallbackPoster}
-              onLoadedData={() => handleLoadedData(mobileVideoRef.current, setMobileReady)}
+              onLoadedMetadata={() => handleLoadedMetadata(mobileVideoRef.current, setMobileReady)}
               onCanPlay={() => handleCanPlay(mobileVideoRef.current)}
+              onError={() => handleVideoError(setMobileReady)}
               className={`${mobileVideoClass} ${placeholderGradient}`}
             />
             <div
@@ -481,21 +487,19 @@ export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, it
                       </div>
                       <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>
                         <div className="transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-2">
-                          <Reveal variant={isEven ? 'fade-left' : 'fade-right'} width="100%" duration={900}>
-                            <div className="space-y-5">
-                              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/60 text-xs uppercase tracking-[0.25em] text-charcoal/70 dark:text-white/70">
-                                {item.category}
-                              </div>
-                              <h3 className="text-3xl md:text-4xl font-display font-bold text-charcoal dark:text-white">
-                                {item.title}
-                              </h3>
-                              {item.description && (
-                                <p className="text-gray-600 dark:text-gray-300 text-base md:text-lg leading-relaxed">
-                                  {item.description}
-                                </p>
-                              )}
+                          <div className="space-y-5">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/60 text-xs uppercase tracking-[0.25em] text-charcoal/70 dark:text-white/70">
+                              {item.category}
                             </div>
-                          </Reveal>
+                            <h3 className="text-3xl md:text-4xl font-display font-bold text-charcoal dark:text-white">
+                              {item.title}
+                            </h3>
+                            {item.description && (
+                              <p className="text-gray-600 dark:text-gray-300 text-base md:text-lg leading-relaxed">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

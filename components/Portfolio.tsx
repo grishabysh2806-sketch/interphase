@@ -11,12 +11,11 @@ interface PortfolioProps {
   items: ProjectItem[];
 }
 
-const ProjectMedia: React.FC<{
-  item: ProjectItem;
-  hideMobileVideos: boolean;
-  preloadPriority?: boolean;
-  isMobile: boolean;
-}> = ({ item, hideMobileVideos, preloadPriority = false, isMobile }) => {
+const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; preloadPriority?: boolean }> = ({
+  item,
+  hideMobileVideos,
+  preloadPriority = false
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const desktopVideoRef = useRef<HTMLVideoElement>(null);
   const mobileVideoRef = useRef<HTMLVideoElement>(null);
@@ -24,7 +23,6 @@ const ProjectMedia: React.FC<{
   const [shouldLoad, setShouldLoad] = useState(false);
   const [canAutoplay, setCanAutoplay] = useState(true);
   const [allowMotion, setAllowMotion] = useState(true);
-  const [preferHighQuality, setPreferHighQuality] = useState(false);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [isHover, setIsHover] = useState(false);
   const [hasHover, setHasHover] = useState(true);
@@ -60,27 +58,6 @@ const ProjectMedia: React.FC<{
   }, []);
 
   useEffect(() => {
-    const nav = navigator as Navigator & {
-      connection?: { effectiveType?: string; saveData?: boolean; downlink?: number; addEventListener?: (type: string, listener: () => void) => void; removeEventListener?: (type: string, listener: () => void) => void };
-      deviceMemory?: number;
-    };
-    const updateQuality = () => {
-      const effectiveType = nav.connection?.effectiveType ?? '';
-      const saveData = nav.connection?.saveData ?? false;
-      const downlink = nav.connection?.downlink ?? 0;
-      const deviceMemory = nav.deviceMemory ?? 8;
-      const allowHighQuality = !saveData && !effectiveType.includes('2g') && (effectiveType === '4g' || downlink >= 3) && deviceMemory >= 4;
-      setPreferHighQuality(allowHighQuality);
-    };
-    updateQuality();
-    if (nav.connection?.addEventListener) {
-      nav.connection.addEventListener('change', updateQuality);
-      return () => nav.connection?.removeEventListener?.('change', updateQuality);
-    }
-    return undefined;
-  }, []);
-
-  useEffect(() => {
     return () => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
@@ -96,13 +73,7 @@ const ProjectMedia: React.FC<{
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const rootMargin = preloadPriority
-      ? isMobile
-        ? '1200px 0px'
-        : '1800px 0px'
-      : isMobile
-        ? '600px 0px'
-        : '900px 0px';
+    const rootMargin = preloadPriority ? '1200px 0px' : '600px 0px';
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
@@ -114,12 +85,11 @@ const ProjectMedia: React.FC<{
     );
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [preloadPriority, isMobile]);
+  }, [preloadPriority]);
 
   const autoplayEnabled = canAutoplay && shouldLoad;
   const playbackEnabled = autoplayEnabled && isVisible;
   const preloadValue = shouldLoad ? 'auto' : 'none';
-  const mobileSource = preferHighQuality ? item.videoDesktopUrl : item.videoMobileUrl;
 
   useEffect(() => {
     if (!shouldLoad) return;
@@ -223,7 +193,7 @@ const ProjectMedia: React.FC<{
           {shouldLoad ? (
             <video
               ref={mobileVideoRef}
-              src={mobileSource}
+              src={item.videoMobileUrl}
               muted
               loop
               playsInline
@@ -441,12 +411,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, it
                   <div className="relative w-full">
                     <div className="relative grid gap-10 md:grid-cols-12 items-center rounded-[36px] px-4 sm:px-6 lg:px-10 py-10 md:py-16">
                       <div className={`md:col-span-8 order-2 ${isEven ? 'md:order-1' : 'md:order-2'}`}>
-                        <ProjectMedia
-                          item={item}
-                          hideMobileVideos={hideMobileVideos}
-                          preloadPriority={isMobile ? true : index < 5}
-                          isMobile={isMobile}
-                        />
+                        <ProjectMedia item={item} hideMobileVideos={hideMobileVideos} preloadPriority={isMobile || index < 3} />
                       </div>
                       <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>
                         <div className="transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-2">

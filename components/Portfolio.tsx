@@ -259,32 +259,30 @@ const ProjectMedia: React.FC<{
         onMouseEnter={handlePointerEnter}
         onMouseLeave={handlePointerLeave}
       >
-        {!isMobileViewport && (
-          <div className={desktopCardClass} style={{ transform: desktopTransform }}>
-            <div className="portfolio-scanline absolute inset-0" />
-            <div className="relative">
-              <video
-                ref={desktopVideoRef}
-                src={desktopSrc}
-                muted
-                loop
-                playsInline
-                preload={preloadValue}
-                autoPlay={autoplayEnabled && isVisible}
-                poster={posterSrc}
-                onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
-                onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
-                onError={() => handleVideoError(setDesktopReady)}
-                className={`${desktopVideoClass} ${placeholderGradient}`}
-              />
-              <div
-                className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
-                  desktopOverlayVisible ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-            </div>
+        <div className={desktopCardClass} style={{ transform: desktopTransform }}>
+          <div className="portfolio-scanline absolute inset-0" />
+          <div className="relative">
+            <video
+              ref={desktopVideoRef}
+              src={desktopSrc}
+              muted
+              loop
+              playsInline
+              preload={preloadValue}
+              autoPlay={autoplayEnabled && isVisible}
+              poster={posterSrc}
+              onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
+              onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
+              onError={() => handleVideoError(setDesktopReady)}
+              className={`${desktopVideoClass} ${placeholderGradient}`}
+            />
+            <div
+              className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
+                desktopOverlayVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
           </div>
-        )}
+        </div>
 
         <div className={mobileCardClass} style={{ transform: mobileTransform }}>
           <div className="portfolio-scanline absolute inset-0" />

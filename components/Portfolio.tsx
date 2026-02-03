@@ -35,6 +35,7 @@ const ProjectMedia: React.FC<{
   const [hasHover, setHasHover] = useState(true);
   const [desktopReady, setDesktopReady] = useState(false);
   const [mobileReady, setMobileReady] = useState(false);
+  const [desktopFailed, setDesktopFailed] = useState(false);
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const rafRef = useRef<number | null>(null);
   const mediaBaseUrl =
@@ -133,6 +134,7 @@ const ProjectMedia: React.FC<{
   useEffect(() => {
     setDesktopReady(false);
     setMobileReady(false);
+    setDesktopFailed(false);
   }, [item.videoDesktopUrl, item.videoMobileUrl]);
 
   useEffect(() => {
@@ -179,7 +181,15 @@ const ProjectMedia: React.FC<{
     }
   };
 
-  const handleVideoError = (markReady: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const handleVideoError = (
+    markReady: React.Dispatch<React.SetStateAction<boolean>>,
+    markFailed?: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    if (markFailed) {
+      markReady(false);
+      markFailed(true);
+      return;
+    }
     markReady(true);
   };
 
@@ -244,6 +254,7 @@ const ProjectMedia: React.FC<{
   const mobileOverlayVisible = shouldLoad && !mobileReady;
   const desktopSrc = resolveMediaUrl(item.videoDesktopUrl);
   const mobileSrc = resolveMediaUrl(item.videoMobileUrl);
+  const desktopSrcResolved = desktopFailed ? mobileSrc : desktopSrc;
   const posterSrc = resolveMediaUrl(item.imageUrl) ?? fallbackPoster;
 
   const hideOnMobile = hideMobileVideos && !hasHover;
@@ -264,7 +275,7 @@ const ProjectMedia: React.FC<{
           <div className="relative">
             <video
               ref={desktopVideoRef}
-              src={desktopSrc}
+                src={desktopSrcResolved}
               muted
               loop
               playsInline
@@ -273,7 +284,7 @@ const ProjectMedia: React.FC<{
               poster={posterSrc}
               onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
               onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
-              onError={() => handleVideoError(setDesktopReady)}
+                onError={() => handleVideoError(setDesktopReady, setDesktopFailed)}
               className={`${desktopVideoClass} ${placeholderGradient}`}
             />
             <div

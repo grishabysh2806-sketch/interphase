@@ -247,7 +247,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '5', 
           title: 'Fourth International', 
           category: 'Education & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesctop.mov',
+          videoDesktopUrl: '/forthinternationaldesctop.mp4',
           videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Language school and academic community focusing on Chinese, Arabic, and English with cultural immersion. During creation, we integrated a complex system of courses, student and teacher accounts, and a payment system link. A demo version is presented on our site as an NDA was signed. The site successfully implements a complex of educational technologies.'
         },

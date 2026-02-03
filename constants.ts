@@ -645,7 +645,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '5', 
           title: 'Четвертый Интернационал', 
           category: 'Образование & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesctop.mp4',
+          videoDesktopUrl: '/forthinternationaldesktop.mp4',
           videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Школа языков и академическое сообщество. Китайский, арабский и английский с культурным погружением. В ходе создания мы интегрировали сложную систему курсов, аккаунтов студентов и преподавателей и ссылку на платежную систему. На нашем сайте предоставлен демо-вариант сайта, так как был подписан NDA. Сайт успешно реализует комплекс образовательных технологий.'
         },

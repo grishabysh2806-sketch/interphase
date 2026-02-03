@@ -247,7 +247,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '5', 
           title: 'Fourth International', 
           category: 'Education & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesctop.mp4',
+          videoDesktopUrl: '/forthinternationaldesktop.mp4',
           videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Language school and academic community focusing on Chinese, Arabic, and English with cultural immersion. During creation, we integrated a complex system of courses, student and teacher accounts, and a payment system link. A demo version is presented on our site as an NDA was signed. The site successfully implements a complex of educational technologies.'
         },
@@ -631,7 +631,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           category: 'Строительство', 
           videoDesktopUrl: '/stroymasterprodesctop.mov',
           videoMobileUrl: '/stroymasterpromob.mp4',
-          description: 'Полный цикл строительных и ремонтных работ. От архитектурного проекта до сдачи под ключ с фиксированной ценой. Перед нами стояла задача построить простой и понятный функциональный лендеинг, при этом явно указав пользователю на скидки и спецпредложения. Клиент остался более чем доволен.'
+          description: 'Полный цикл строительных и ремонтных работ. От архитектурного проекта до сдачи под ключ с фиксированной ценой. Перед нами стояла задача построить простой и понятный функциональный лендинг, при этом явно указав пользователю на скидки и спецпредложения. Клиент остался более чем доволен.'
         },
         { 
           id: '1', 
@@ -645,7 +645,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '5', 
           title: 'Четвертый Интернационал', 
           category: 'Образование & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesctop.mov',
+          videoDesktopUrl: '/forthinternationaldesctop.mp4',
           videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Школа языков и академическое сообщество. Китайский, арабский и английский с культурным погружением. В ходе создания мы интегрировали сложную систему курсов, аккаунтов студентов и преподавателей и ссылку на платежную систему. На нашем сайте предоставлен демо-вариант сайта, так как был подписан NDA. Сайт успешно реализует комплекс образовательных технологий.'
         },

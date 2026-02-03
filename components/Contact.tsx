@@ -61,7 +61,7 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
             {text.title}<span className="text-brown dark:text-neon">.</span>
           </h2>
           
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-start mb-12">
             <a 
                 href={text.telegramLink} 
                 target="_blank" 
@@ -117,7 +117,7 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
               <Button 
                 type="submit" 
                 variant="outline" 
-                className="w-full md:w-auto"
+                className="w-full md:w-auto rounded-full"
                 disabled={status === 'sending'}
               >
                 {status === 'sending' ? 'Transmitting...' : text.submit}

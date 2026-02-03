@@ -191,16 +191,25 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: 'seo-geo',
           number: '08', 
           title: 'SEO & GEO Turnkey', 
-          shortDescription: 'Search and generative visibility engineered for conversion.', 
-          longDescription: 'We deliver a full-cycle visibility system: technical SEO, structured content, and GEO (Generative Engine Optimization) that positions your brand inside AI answers. We align information architecture, performance, and content strategy to grow qualified traffic and lead flow. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
-          features: ['Technical SEO & Core Web Vitals', 'Semantic Content Architecture', 'GEO for AI Search & Assistants', 'Analytics, Tracking & Growth'],
+          shortDescription: 'SEO, GEO, and promotion built to win search and AI answers.', 
+          longDescription: 'We build a full visibility system: technical SEO, semantic content, brand entity development, and GEO (Generative Engine Optimization) so your brand appears in AI answers and wins clicks. We combine architecture, performance, and promotion to grow qualified traffic and conversions. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
+          features: [
+            'Technical SEO Audits & Fixes',
+            'Semantic Keyword Clustering',
+            'Entity & Topical Authority Building',
+            'GEO for AI Search & Assistants',
+            'Local & Global Visibility Strategy',
+            'Digital PR & Backlink Outreach',
+            'Snippet, CTR & Conversion Optimization',
+            'Analytics Dashboards & Growth Experiments'
+          ],
           cta: 'Boost Visibility',
           faq: [
             { question: "What is GEO?", answer: "GEO is optimization for AI-driven search and assistants, ensuring your brand is cited and recommended in generative responses." },
+            { question: "Is promotion included?", answer: "Yes, we combine technical SEO with digital PR, outreach, and authority signals to strengthen rankings." },
             { question: "Do you work with existing sites?", answer: "Yes, we audit your current stack and implement a prioritized roadmap without breaking live traffic." },
             { question: "How long to see results?", answer: "Early improvements can appear within weeks, with strong momentum typically in 2-4 months." },
-            { question: "Will you write content?", answer: "Yes, we create or refine content based on intent mapping and semantic clusters." },
-            { question: "Do you provide reporting?", answer: "We deliver transparent dashboards with traffic, rankings, and conversion metrics." }
+            { question: "Will you write content?", answer: "Yes, we create or refine content based on intent mapping, semantic clusters, and AI-friendly structure." }
           ]
         },
          { 
@@ -589,16 +598,25 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: 'seo-geo',
           number: '08', 
           title: 'SEO&GEO под ключ', 
-          shortDescription: 'Видимость в поиске и ИИ-ответах с фокусом на конверсию.', 
-          longDescription: 'Мы выстраиваем полный контур видимости: технический SEO, структурированный контент и GEO (Generative Engine Optimization), чтобы ваш бренд появлялся в ответах ИИ. Синхронизируем архитектуру, скорость и контент-стратегию для роста целевого трафика и заявок.',
-          features: ['Технический SEO и Core Web Vitals', 'Семантическая архитектура контента', 'GEO для AI поиска и ассистентов', 'Аналитика, трекинг и рост'],
+          shortDescription: 'SEO, GEO и продвижение для роста в поиске и AI-ответах.', 
+          longDescription: 'Мы выстраиваем полный контур видимости: технический SEO, семантический контент, развитие сущностей бренда и GEO (Generative Engine Optimization), чтобы вас цитировали в генеративных ответах и чаще выбирали в выдаче. Синхронизируем архитектуру, скорость и продвижение для роста целевого трафика и заявок.',
+          features: [
+            'Технический SEO аудит и исправления',
+            'Семантическое ядро и кластеризация',
+            'Entity SEO и тематический авторитет',
+            'GEO для AI поиска и ассистентов',
+            'Локальная и глобальная видимость',
+            'Digital PR и линкбилдинг',
+            'Оптимизация сниппетов и CTR',
+            'Аналитика и growth-эксперименты'
+          ],
           cta: 'Усилить Видимость',
           faq: [
-            { question: "Что такое GEO?", answer: "GEO — это оптимизация для AI-поиска и ассистентов, чтобы бренд цитировался в генеративных ответах." },
+            { question: "Что такое GEO?", answer: "GEO — это оптимизация для AI-поиска и ассистентов, чтобы бренд цитировался и рекомендовался в генеративных ответах." },
+            { question: "Продвижение входит в услугу?", answer: "Да, мы соединяем SEO с digital PR, линкбилдингом и усилением авторитета." },
             { question: "Вы работаете с существующим сайтом?", answer: "Да, мы делаем аудит и внедряем дорожную карту без потери текущего трафика." },
             { question: "Когда появятся результаты?", answer: "Первые улучшения возможны через несколько недель, устойчивый рост — через 2-4 месяца." },
-            { question: "Вы пишете контент?", answer: "Да, создаем и улучшаем контент на основе интент-кластеров и семантики." },
-            { question: "Есть ли отчетность?", answer: "Мы даем прозрачные отчеты по трафику, позициям и конверсиям." }
+            { question: "Вы пишете контент?", answer: "Да, создаем и улучшаем контент на основе интент-кластеров, семантики и AI-структуры." }
           ]
         },
          { 

@@ -111,9 +111,10 @@ const ProjectMedia: React.FC<{
     return () => observer.disconnect();
   }, [preloadPriority]);
 
+  const shouldRequestMedia = shouldLoad || preloadPriority;
   const autoplayEnabled = canAutoplay && shouldLoad;
   const playbackEnabled = autoplayEnabled && isVisible;
-  const preloadValue = shouldLoad || preloadPriority ? 'auto' : 'none';
+  const preloadValue = shouldRequestMedia ? 'auto' : 'none';
 
   useEffect(() => {
     if (!shouldLoad) return;
@@ -180,7 +181,7 @@ const ProjectMedia: React.FC<{
   };
 
   const handleVideoError = (markReady: React.Dispatch<React.SetStateAction<boolean>>) => {
-    markReady(true);
+    markReady(false);
   };
 
   const resolveMediaUrl = (url?: string) => {
@@ -264,7 +265,7 @@ const ProjectMedia: React.FC<{
           <div className="relative">
             <video
               ref={desktopVideoRef}
-              src={desktopSrc}
+              src={shouldRequestMedia ? desktopSrc : undefined}
               muted
               loop
               playsInline
@@ -289,7 +290,7 @@ const ProjectMedia: React.FC<{
           <div className="relative">
             <video
               ref={mobileVideoRef}
-              src={mobileSrc}
+              src={shouldRequestMedia ? mobileSrc : undefined}
               muted
               loop
               playsInline
@@ -518,7 +519,7 @@ export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, it
                           item={item}
                           hideMobileVideos={hideMobileVideos}
                           isMobileViewport={isMobile}
-                          preloadPriority={index < (isMobile ? 1 : 3)}
+                          preloadPriority={index < 1}
                         />
                       </div>
                       <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>

@@ -63,7 +63,7 @@ export const Process: React.FC<ProcessProps> = ({ content }) => {
 
         {/* Payment & CTA Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
-            <Reveal delay={200}>
+            <Reveal delay={200} width="100%" className="h-full">
                 <div className="h-full rounded-3xl bg-white/50 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 p-8 md:p-12 backdrop-blur-sm hover:border-brown/30 dark:hover:border-neon/30 transition-all duration-300">
                     <div className="flex flex-col items-start gap-6">
                         <div className="p-4 rounded-full bg-brown/10 dark:bg-neon/10 text-brown dark:text-neon">
@@ -81,7 +81,7 @@ export const Process: React.FC<ProcessProps> = ({ content }) => {
                 </div>
             </Reveal>
 
-            <Reveal delay={300}>
+            <Reveal delay={300} width="100%" className="h-full">
                  <div className="h-full rounded-3xl bg-charcoal dark:bg-card border border-charcoal dark:border-white/10 p-8 md:p-12 relative overflow-hidden group">
                      {/* Abstract BG */}
                      <div className="absolute top-0 right-0 w-64 h-64 bg-brown/20 dark:bg-neon/10 rounded-full blur-[80px] group-hover:bg-brown/30 dark:group-hover:bg-neon/20 transition-all duration-700"></div>

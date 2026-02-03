@@ -231,7 +231,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '2', 
           title: 'StroyMaster Pro', 
           category: 'Construction', 
-          videoDesktopUrl: '/stroymasterprodesctop.mov',
+          videoDesktopUrl: '/stroymasterprodesktop.mov',
           videoMobileUrl: '/stroymasterpromob.mp4',
           description: 'Full-cycle construction and renovation services. From architectural design to turnkey delivery with fixed pricing. We were tasked with building a simple and clear functional landing page, while clearly pointing the user to discounts and special offers. The client was more than satisfied.'
         },
@@ -239,15 +239,15 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '1', 
           title: 'ELEUSIS', 
           category: 'Gaming & Esports', 
-          videoDesktopUrl: '/eleusisdesctop.mov',
-          videoMobileUrl: '/eleusuismob.mp4',
+          videoDesktopUrl: '/eleusisdesktop.mov',
+          videoMobileUrl: '/eleusismob.mp4',
           description: 'The ultimate gaming sanctuary. CS2, Dota 2, Valorant tournaments and hardware arsenal. We were tasked with making the site bright and memorable for gamers, resulting in a 29% increase in conversion.'
         },
         { 
           id: '5', 
           title: 'Fourth International', 
           category: 'Education & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesctop.mov',
+          videoDesktopUrl: '/forthinternationaldesktop.mov',
           videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Language school and academic community focusing on Chinese, Arabic, and English with cultural immersion. During creation, we integrated a complex system of courses, student and teacher accounts, and a payment system link. A demo version is presented on our site as an NDA was signed. The site successfully implements a complex of educational technologies.'
         },
@@ -255,7 +255,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '6', 
           title: 'Monday Magazine', 
           category: 'Digital Media', 
-          videoDesktopUrl: '/mondaydesctop.mov',
+          videoDesktopUrl: '/mondaydesktop.mp4',
           videoMobileUrl: '/mondaymob.mp4',
           description: 'A digital cultural magazine focusing on visual aesthetics and modern culture. Real-time content parsing from the database to the site was implemented. As a result - stylish work without glitches.'
         },
@@ -263,7 +263,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '7', 
           title: '388.nail', 
           category: 'Beauty & Wellness', 
-          videoDesktopUrl: '/388desctop.mov',
+          videoDesktopUrl: '/388desktop.mp4',
           videoMobileUrl: '/388mob.mp4',
           description: 'A tropical paradise in the city. We created a digital experience that reflects their "mini-vacation" concept, bringing the Bali jungle vibes to the web.'
         },
@@ -629,7 +629,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '2', 
           title: 'StroyMaster Pro', 
           category: 'Строительство', 
-          videoDesktopUrl: '/stroymasterprodesctop.mov',
+          videoDesktopUrl: '/stroymasterprodesktop.mov',
           videoMobileUrl: '/stroymasterpromob.mp4',
           description: 'Полный цикл строительных и ремонтных работ. От архитектурного проекта до сдачи под ключ с фиксированной ценой. Перед нами стояла задача построить простой и понятный функциональный лендеинг, при этом явно указав пользователю на скидки и спецпредложения. Клиент остался более чем доволен.'
         },
@@ -637,15 +637,15 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '1', 
           title: 'ELEUSIS', 
           category: 'Гейминг & Киберспорт', 
-          videoDesktopUrl: '/eleusisdesctop.mov',
-          videoMobileUrl: '/eleusuismob.mp4',
+          videoDesktopUrl: '/eleusisdesktop.mov',
+          videoMobileUrl: '/eleusismob.mp4',
           description: 'Ультимативное игровое пространство. Турниры по CS2, Dota 2, Valorant и топовое железо. Перед нами стояла задача сделать сайт ярким и запоминающимся для геймеров, итогом стало повышение конверсии на 29%'
         },
         { 
           id: '5', 
           title: 'Четвертый Интернационал', 
           category: 'Образование & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesctop.mov',
+          videoDesktopUrl: '/forthinternationaldesktop.mov',
           videoMobileUrl: '/forthinternationalmob.mp4',
           description: 'Школа языков и академическое сообщество. Китайский, арабский и английский с культурным погружением. В ходе создания мы интегрировали сложную систему курсов, аккаунтов студентов и преподавателей и ссылку на платежную систему. На нашем сайте предоставлен демо-вариант сайта, так как был подписан NDA. Сайт успешно реализует комплекс образовательных технологий.'
         },
@@ -653,7 +653,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '6', 
           title: 'Понедельник', 
           category: 'Digital Медиа', 
-          videoDesktopUrl: '/mondaydesctop.mov',
+          videoDesktopUrl: '/mondaydesktop.mp4',
           videoMobileUrl: '/mondaymob.mp4',
           description: 'Цифровой журнал о культуре и визуальной эстетике. Современный взгляд на искусство и дизайн. Был реализован парсинг контента с базы данных на сайт в реальном времени. Как итог - стильная работа без сбоев.'
         },
@@ -661,7 +661,7 @@ export const CONTENT: Record<Language, ContentDictionary> = {
           id: '7', 
           title: '388.nail', 
           category: 'Красота и Здоровье', 
-          videoDesktopUrl: '/388desctop.mov',
+          videoDesktopUrl: '/388desktop.mp4',
           videoMobileUrl: '/388mob.mp4',
           description: 'Тропический рай в городе. Мы создали цифровой опыт, отражающий концепцию "мини-отпуска", перенеся атмосферу джунглей Бали в веб.'
         },

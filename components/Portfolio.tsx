@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ProjectItem } from '../types';
 import { Reveal } from './Reveal';
 import { RollingText } from './RollingText';
+import { supabase } from '../services/supabaseClient';
 
 interface PortfolioProps {
   title: string;
@@ -11,9 +12,15 @@ interface PortfolioProps {
   items: ProjectItem[];
 }
 
-const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; preloadPriority?: boolean }> = ({
+const ProjectMedia: React.FC<{
+  item: ProjectItem;
+  hideMobileVideos: boolean;
+  isMobileViewport: boolean;
+  preloadPriority?: boolean;
+}> = ({
   item,
   hideMobileVideos,
+  isMobileViewport,
   preloadPriority = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,6 +40,7 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
   const mediaBaseUrl =
     (import.meta.env.VITE_MEDIA_BASE_URL as string | undefined) ||
     (import.meta.env.VITE_SUPABASE_STORAGE_URL as string | undefined);
+  const mediaBucket = (import.meta.env.VITE_SUPABASE_MEDIA_BUCKET as string | undefined) || 'videos';
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -178,10 +186,18 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
   const resolveMediaUrl = (url?: string) => {
     if (!url) return url;
     if (/^https?:\/\//i.test(url)) return url;
-    if (!mediaBaseUrl) return url;
-    const trimmedBase = mediaBaseUrl.replace(/\/$/, '');
     const trimmedPath = url.startsWith('/') ? url.slice(1) : url;
-    return `${trimmedBase}/${trimmedPath}`;
+    if (mediaBaseUrl) {
+      const trimmedBase = mediaBaseUrl.replace(/\/$/, '');
+      return `${trimmedBase}/${trimmedPath}`;
+    }
+    if (supabase) {
+      const { data } = supabase.storage.from(mediaBucket).getPublicUrl(trimmedPath);
+      if (data?.publicUrl) {
+        return data.publicUrl;
+      }
+    }
+    return url;
   };
 
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -243,30 +259,32 @@ const ProjectMedia: React.FC<{ item: ProjectItem; hideMobileVideos: boolean; pre
         onMouseEnter={handlePointerEnter}
         onMouseLeave={handlePointerLeave}
       >
-        <div className={desktopCardClass} style={{ transform: desktopTransform }}>
-          <div className="portfolio-scanline absolute inset-0" />
-          <div className="relative">
-            <video
-              ref={desktopVideoRef}
-              src={desktopSrc}
-              muted
-              loop
-              playsInline
-              preload={preloadValue}
-              autoPlay={autoplayEnabled && isVisible}
-              poster={posterSrc}
-              onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
-              onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
-              onError={() => handleVideoError(setDesktopReady)}
-              className={`${desktopVideoClass} ${placeholderGradient}`}
-            />
-            <div
-              className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
-                desktopOverlayVisible ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
+        {!isMobileViewport && (
+          <div className={desktopCardClass} style={{ transform: desktopTransform }}>
+            <div className="portfolio-scanline absolute inset-0" />
+            <div className="relative">
+              <video
+                ref={desktopVideoRef}
+                src={desktopSrc}
+                muted
+                loop
+                playsInline
+                preload={preloadValue}
+                autoPlay={autoplayEnabled && isVisible}
+                poster={posterSrc}
+                onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
+                onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
+                onError={() => handleVideoError(setDesktopReady)}
+                className={`${desktopVideoClass} ${placeholderGradient}`}
+              />
+              <div
+                className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
+                  desktopOverlayVisible ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className={mobileCardClass} style={{ transform: mobileTransform }}>
           <div className="portfolio-scanline absolute inset-0" />
@@ -498,7 +516,12 @@ export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, it
                   <div className="relative w-full">
                     <div className="relative grid gap-10 md:grid-cols-12 items-center rounded-[36px] px-4 sm:px-6 lg:px-10 py-10 md:py-16">
                       <div className={`md:col-span-8 order-2 ${isEven ? 'md:order-1' : 'md:order-2'}`}>
-                        <ProjectMedia item={item} hideMobileVideos={hideMobileVideos} preloadPriority={isMobile || index < 3} />
+                        <ProjectMedia
+                          item={item}
+                          hideMobileVideos={hideMobileVideos}
+                          isMobileViewport={isMobile}
+                          preloadPriority={index < (isMobile ? 1 : 3)}
+                        />
                       </div>
                       <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>
                         <div className="transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-2">

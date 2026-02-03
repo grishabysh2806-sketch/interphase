@@ -186,6 +186,7 @@ declare global {
     readonly VITE_SUPABASE_ANON_KEY?: string;
     readonly VITE_SUPABASE_STORAGE_URL?: string;
     readonly VITE_MEDIA_BASE_URL?: string;
+    readonly VITE_SUPABASE_MEDIA_BUCKET?: string;
   }
 
   interface ImportMeta {

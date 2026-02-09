@@ -117,4 +117,6 @@ dist
 .pnp.*
 
 # MacOS
-.DS_Store
+
+# Allow dist folders in public/projects
+!public/projects/*/dist

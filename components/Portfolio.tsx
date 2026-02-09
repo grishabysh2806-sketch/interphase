@@ -3,566 +3,309 @@ import { ProjectItem } from '../types';
 import { Reveal } from './Reveal';
 import { RollingText } from './RollingText';
 import { supabase } from '../services/supabaseClient';
+import { X, Loader, ExternalLink, Play, Maximize, Minimize, Smartphone, Monitor } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface PortfolioProps {
   title: string;
   subtitle: string;
   outro?: string;
-  visitLink?: string;
   items: ProjectItem[];
+  visitLink?: string;
+  lang?: 'en' | 'ru';
 }
 
-const ProjectMedia: React.FC<{
-  item: ProjectItem;
-  hideMobileVideos: boolean;
-  isMobileViewport: boolean;
-  preloadPriority?: boolean;
-}> = ({
-  item,
-  hideMobileVideos,
-  isMobileViewport,
-  preloadPriority = false
-}) => {
+// --- Preview Modal ---
+const PreviewModal: React.FC<{ url: string; title: string; image?: string; onClose: () => void; lang: 'en' | 'ru' }> = ({ url, title, onClose, lang }) => {
+  const [loading, setLoading] = useState(true);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const desktopVideoRef = useRef<HTMLVideoElement>(null);
-  const mobileVideoRef = useRef<HTMLVideoElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const [canAutoplay, setCanAutoplay] = useState(true);
-  const [allowMotion, setAllowMotion] = useState(true);
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
-  const [isHover, setIsHover] = useState(false);
-  const [hasHover, setHasHover] = useState(true);
-  const [desktopReady, setDesktopReady] = useState(false);
-  const [mobileReady, setMobileReady] = useState(false);
-  const [hasBeenVisible, setHasBeenVisible] = useState(false);
-  const rafRef = useRef<number | null>(null);
-  const mediaBaseUrl =
-    (import.meta.env.VITE_MEDIA_BASE_URL as string | undefined) ||
-    (import.meta.env.VITE_SUPABASE_STORAGE_URL as string | undefined);
-  const mediaBucket = (import.meta.env.VITE_SUPABASE_MEDIA_BUCKET as string | undefined) || 'videos';
+  const [scale, setScale] = useState(1);
 
+  // Close on Escape
   useEffect(() => {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const hoverMedia = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const update = () => {
-      const reduced = reduceMotion.matches;
-      setCanAutoplay(!reduced);
-      setAllowMotion(!reduced);
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
     };
-    const updateHover = () => setHasHover(hoverMedia.matches);
-    update();
-    updateHover();
-    if (reduceMotion.addEventListener) {
-      reduceMotion.addEventListener('change', update);
-      hoverMedia.addEventListener('change', updateHover);
-    } else {
-      reduceMotion.addListener(update);
-      hoverMedia.addListener(updateHover);
-    }
-    return () => {
-      if (reduceMotion.removeEventListener) {
-        reduceMotion.removeEventListener('change', update);
-        hoverMedia.removeEventListener('change', updateHover);
-      } else {
-        reduceMotion.removeListener(update);
-        hoverMedia.removeListener(updateHover);
-      }
-    };
-  }, []);
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
 
+  // Reset loading and zoom when URL changes
   useEffect(() => {
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-      const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
-      videos.forEach((video) => {
-        video.pause();
-        video.removeAttribute('src');
-        video.load();
-      });
-    };
-  }, []);
+    setLoading(true);
+    setIsZoomed(false);
+  }, [url]);
 
+  // Calculate Scale for Iframe
   useEffect(() => {
     if (!containerRef.current) return;
-    const rootMargin = preloadPriority ? '1200px 0px' : '600px 0px';
-    const rect = containerRef.current.getBoundingClientRect();
-    const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    setIsVisible(inView);
-    if (inView) {
-      setHasBeenVisible(true);
-    }
-    if (inView) {
-      setShouldLoad(true);
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-        if (entry.isIntersecting) {
-          setHasBeenVisible(true);
-          setShouldLoad(true);
-        }
-      },
-      { rootMargin }
-    );
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [preloadPriority]);
 
-  const shouldRequestMedia = shouldLoad || preloadPriority;
-  const autoplayEnabled = canAutoplay && shouldLoad;
-  const playbackEnabled = autoplayEnabled && isVisible;
-  const preloadValue = shouldRequestMedia ? 'auto' : 'none';
-
-  useEffect(() => {
-    if (!shouldLoad) return;
-    const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
-    videos.forEach((video) => {
-      video.preload = 'auto';
-      video.load();
-    });
-  }, [shouldLoad]);
-
-  useEffect(() => {
-    if (preloadPriority || item.id === '7') {
-      setShouldLoad(true);
-    }
-  }, [item.id, preloadPriority]);
-
-  useEffect(() => {
-    setDesktopReady(false);
-    setMobileReady(false);
-  }, [item.videoDesktopUrl, item.videoMobileUrl]);
-
-  useEffect(() => {
-    const videos = [desktopVideoRef.current, mobileVideoRef.current].filter(Boolean) as HTMLVideoElement[];
-    if (!videos.length) return;
-    if (!playbackEnabled) {
-      videos.forEach((video) => video.pause());
-      return;
-    }
-    videos.forEach((video) => {
-      const playPromise = video.play();
-      if (playPromise) {
-        playPromise.catch(() => undefined);
-      }
-    });
-  }, [isVisible, playbackEnabled]);
-
-  const handleCanPlay = (video: HTMLVideoElement | null) => {
-    if (!video || !playbackEnabled) return;
-    const playPromise = video.play();
-    if (playPromise) {
-      playPromise.catch(() => undefined);
-    }
-  };
-
-  const handleLoadedMetadata = (
-    video: HTMLVideoElement | null,
-    markReady: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    markReady(true);
-    if (!video) return;
-    if (playbackEnabled && video.readyState >= 2) {
-      handleCanPlay(video);
-      return;
-    }
-    if (video.readyState >= 1 && video.currentTime === 0) {
-      const safeDuration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0.1;
-      const targetTime = Math.min(0.1, safeDuration);
-      try {
-        video.currentTime = targetTime;
-      } catch {
+    const updateScale = () => {
+      if (isZoomed) {
+        setScale(1);
         return;
       }
-    }
-  };
 
-  const handleVideoError = (markReady: React.Dispatch<React.SetStateAction<boolean>>) => {
-    markReady(false);
-  };
-
-  const resolveMediaUrl = (url?: string) => {
-    if (!url) return url;
-    if (/^https?:\/\//i.test(url)) return url;
-    const trimmedPath = url.startsWith('/') ? url.slice(1) : url;
-    if (mediaBaseUrl) {
-      const trimmedBase = mediaBaseUrl.replace(/\/$/, '');
-      return `${trimmedBase}/${trimmedPath}`;
-    }
-    if (supabase) {
-      const { data } = supabase.storage.from(mediaBucket).getPublicUrl(trimmedPath);
-      if (data?.publicUrl) {
-        return data.publicUrl;
+      if (containerRef.current) {
+        const { width } = containerRef.current.getBoundingClientRect();
+        setScale(width / 1280);
       }
-    }
-    return url;
-  };
+    };
 
-  const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!allowMotion || !hasHover) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 14;
-    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 10;
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-    }
-    rafRef.current = requestAnimationFrame(() => {
-      setParallax({ x, y });
+    const observer = new ResizeObserver(() => {
+      window.requestAnimationFrame(updateScale);
     });
+
+    observer.observe(containerRef.current);
+    updateScale();
+
+    return () => observer.disconnect();
+  }, [isZoomed]);
+
+  const t = {
+    loading: lang === 'ru' ? 'Загрузка...' : 'Loading Experience...',
+    close: lang === 'ru' ? 'Закрыть' : 'Close',
+    desktop: lang === 'ru' ? 'Настольная версия' : 'Desktop View',
+    mobile: lang === 'ru' ? 'Мобильная версия' : 'Mobile View'
   };
 
-  const handlePointerEnter = () => {
-    if (!hasHover) return;
-    setIsHover(true);
-  };
-
-  const handlePointerLeave = () => {
-    setIsHover(false);
-    setParallax({ x: 0, y: 0 });
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-    }
-  };
-
-  const motionX = allowMotion ? parallax.x : 0;
-  const motionY = allowMotion ? parallax.y : 0;
-  const motionEnabled = allowMotion && hasHover;
-  const desktopTransform = `translate3d(${motionEnabled ? motionX : 0}px, ${motionEnabled ? motionY + (isHover ? -8 : 0) : 0}px, 0) scale(${isHover && motionEnabled ? 1.02 : 1})`;
-  const mobileTransform = `translate3d(${motionEnabled ? motionX * -1.1 : 0}px, ${motionEnabled ? motionY * -1.1 + (isHover ? 6 : 0) : 0}px, 0) scale(${isHover && motionEnabled ? 1.03 : 1})`;
-  const desktopCardClass = `relative overflow-hidden rounded-3xl border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/40 self-center shadow-[0_24px_70px_rgba(10,10,10,0.2)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:shadow-[0_55px_140px_rgba(10,10,10,0.5)]`;
-  const mobileCardClass = `w-full md:w-full overflow-hidden rounded-3xl border border-charcoal/10 dark:border-white/10 bg-white/80 dark:bg-charcoal/60 self-center shadow-[0_18px_50px_rgba(10,10,10,0.25)] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:shadow-[0_45px_110px_rgba(10,10,10,0.45)]`;
-  const desktopVideoClass = `w-full h-full aspect-[16/10] object-cover transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]`;
-  const mobileVideoClass = `w-full h-full aspect-[9/16] object-cover transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]`;
-  const placeholderGradient = 'bg-gradient-to-br from-gray-200/80 to-gray-300/80 dark:from-charcoal/50 dark:to-black/70';
-  const desktopPlaceholderClass = `${desktopVideoClass} ${placeholderGradient}`;
-  const mobilePlaceholderClass = `${mobileVideoClass} ${placeholderGradient}`;
-  const fallbackPoster =
-    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%23e5e7eb'/><stop offset='100%' stop-color='%23d1d5db'/></linearGradient><rect width='1600' height='900' fill='url(%23g)'/></svg>";
-  const desktopOverlayVisible = shouldLoad && !desktopReady;
-  const mobileOverlayVisible = shouldLoad && !mobileReady;
-  const desktopSrc = resolveMediaUrl(item.videoDesktopUrl);
-  const mobileSrc = resolveMediaUrl(item.videoMobileUrl);
-  const posterSrc = resolveMediaUrl(item.imageUrl) ?? fallbackPoster;
-
-  const hideOnMobile = hideMobileVideos && !hasHover;
-
-  return (
-    <div
-      ref={containerRef}
-      className={`portfolio-card ${hasBeenVisible ? 'portfolio-card--active' : ''} ${hideOnMobile ? 'hidden' : ''}`}
-    >
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200">
+      {/* Backdrop */}
       <div
-        className="relative grid gap-6 md:gap-10 md:grid-cols-[1.05fr_0.55fr] items-center"
-        onMouseMove={handlePointerMove}
-        onMouseEnter={handlePointerEnter}
-        onMouseLeave={handlePointerLeave}
-      >
-        <div className={desktopCardClass} style={{ transform: desktopTransform }}>
-          <div className="portfolio-scanline absolute inset-0" />
-          <div className="relative">
-            <video
-              ref={desktopVideoRef}
-              src={shouldRequestMedia ? desktopSrc : undefined}
-              muted
-              loop
-              playsInline
-              preload={preloadValue}
-              autoPlay={autoplayEnabled && isVisible}
-              poster={posterSrc}
-              onLoadedMetadata={() => handleLoadedMetadata(desktopVideoRef.current, setDesktopReady)}
-              onCanPlay={() => handleCanPlay(desktopVideoRef.current)}
-              onError={() => handleVideoError(setDesktopReady)}
-              className={`${desktopVideoClass} ${placeholderGradient}`}
-            />
-            <div
-              className={`pointer-events-none absolute inset-0 ${desktopPlaceholderClass} transition-opacity duration-500 ${
-                desktopOverlayVisible ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
+        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
+        onClick={onClose}
+      />
+
+      {/* Modal Container */}
+      <div className="relative w-full max-w-[95vw] h-[95vh] bg-zinc-950 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10 ring-1 ring-white/5 z-10 transition-all duration-300">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-zinc-900 border-b border-white/5 shrink-0 z-20">
+          {/* Left: Zoom Toggle (Mobile Only) */}
+          <div className="w-12 sm:w-[140px] flex items-center">
+            <button
+              onClick={() => setIsZoomed(!isZoomed)}
+              className="group flex items-center justify-center gap-2 w-10 h-10 sm:w-auto sm:px-4 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 transition-all duration-300 border border-white/10"
+              title={isZoomed ? t.desktop : t.mobile}
+            >
+              {isZoomed ? <Monitor size={18} /> : <Smartphone size={18} />}
+              <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">{isZoomed ? t.desktop : t.mobile}</span>
+            </button>
+          </div>
+
+          {/* Center: Title (Optional, hidden on mobile usually to save space, or just empty) */}
+          <div className="flex items-center justify-center absolute left-1/2 -translate-x-1/2">
+            {/* Can add title here if needed, but keeping clean for now */}
+          </div>
+
+          {/* Right: Close Button */}
+          <div className="w-12 sm:w-[140px] flex items-center justify-end">
+            <button
+              onClick={onClose}
+              className="group flex items-center justify-center gap-2 w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-zinc-400 transition-all duration-200 border border-white/5"
+            >
+              <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">{t.close}</span>
+              <X size={16} />
+            </button>
           </div>
         </div>
 
-        <div className={mobileCardClass} style={{ transform: mobileTransform }}>
-          <div className="portfolio-scanline absolute inset-0" />
-          <div className="relative">
-            <video
-              ref={mobileVideoRef}
-              src={shouldRequestMedia ? mobileSrc : undefined}
-              muted
-              loop
-              playsInline
-              preload={preloadValue}
-              autoPlay={autoplayEnabled && isVisible}
-              poster={posterSrc}
-              onLoadedMetadata={() => handleLoadedMetadata(mobileVideoRef.current, setMobileReady)}
-              onCanPlay={() => handleCanPlay(mobileVideoRef.current)}
-              onError={() => handleVideoError(setMobileReady)}
-              className={`${mobileVideoClass} ${placeholderGradient}`}
-            />
-            <div
-              className={`pointer-events-none absolute inset-0 ${mobilePlaceholderClass} transition-opacity duration-500 ${
-                mobileOverlayVisible ? 'opacity-100' : 'opacity-0'
+        {/* Content Area */}
+        <div className="flex-1 relative overflow-hidden bg-[#0c0c0c] flex flex-col items-center justify-center p-2 sm:p-4">
+
+          {/* Project Title Label (Background) */}
+          <div className="absolute top-8 left-0 right-0 text-center pointer-events-none z-0 opacity-20 select-none overflow-hidden">
+            <h3 className="text-zinc-500 font-display font-bold text-[10vw] leading-none uppercase tracking-tighter whitespace-nowrap opacity-50">{title}</h3>
+          </div>
+
+          {/* Frame Container */}
+          <div
+            ref={containerRef}
+            className={`relative transition-all duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] z-10 flex flex-col shadow-2xl ${isZoomed
+              ? 'w-full md:w-[400px] h-full rounded-xl border border-white/10 bg-zinc-950 overflow-auto mx-auto'
+              : 'w-full aspect-video rounded-lg border border-white/10 bg-zinc-950 overflow-hidden'
               }`}
-            />
+          >
+            {/* Show Loader */}
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 z-20">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader className="animate-spin text-indigo-500" size={32} />
+                  <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">{t.loading}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Scrollable Content Wrapper */}
+            <div className={`w-full h-full relative`}>
+              {/* Iframe */}
+              <iframe
+                ref={iframeRef}
+                src={url}
+                style={{
+                  width: isZoomed ? '100%' : '1280px',
+                  height: isZoomed ? '100%' : '720px',
+                  minHeight: isZoomed ? '720px' : undefined,
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                  pointerEvents: 'auto',
+                  backgroundColor: '#0c0c0c'
+                }}
+                className={`bg-zinc-950 transition-opacity duration-300 w-full min-h-full ${loading ? 'opacity-0' : 'opacity-100'}`}
+                onLoad={() => setLoading(false)}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title={`${title} Preview`}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
-const DividerSnakeText: React.FC<{ direction: 'left' | 'right' }> = ({ direction }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-  const easingRef = useRef<number | null>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
-  const [allowMotion, setAllowMotion] = useState(true);
-  const [isActive, setIsActive] = useState(false);
-  const targetRef = useRef(0);
-  const [metrics, setMetrics] = useState({ viewport: 0, text: 0 });
+
+
+// --- Single Project Card ---
+const ProjectCard: React.FC<{
+  item: ProjectItem;
+  onClick: () => void;
+  priority: boolean;
+  actionLabel: string;
+}> = ({ item, onClick, priority, actionLabel }) => {
+  const [isHover, setIsHover] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setAllowMotion(!reduceMotion.matches);
-    update();
-    if (reduceMotion.addEventListener) {
-      reduceMotion.addEventListener('change', update);
-      return () => reduceMotion.removeEventListener('change', update);
-    }
-    reduceMotion.addListener(update);
-    return () => reduceMotion.removeListener(update);
-  }, []);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsActive(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
       },
-      { rootMargin: '200px 0px' }
+      { rootMargin: '200px' }
     );
-    observer.observe(containerRef.current);
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!isActive) return;
-    const updateTarget = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const viewport = window.innerHeight;
-      const startOffset = viewport * 0.35;
-      const total = rect.height + viewport + startOffset;
-      targetRef.current = Math.min(Math.max((viewport + startOffset - rect.top) / total, 0), 1);
-    };
-    const handleScroll = () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-      rafRef.current = requestAnimationFrame(updateTarget);
-    };
-    updateTarget();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, [isActive]);
-
-  useEffect(() => {
-    if (!isActive || !allowMotion) {
-      setProgress(targetRef.current);
-      return;
-    }
-    const animate = () => {
-      setProgress((prev) => {
-        const next = prev + (targetRef.current - prev) * 0.01;
-        return Math.abs(next - targetRef.current) < 0.001 ? targetRef.current : next;
-      });
-      easingRef.current = requestAnimationFrame(animate);
-    };
-    easingRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (easingRef.current) {
-        cancelAnimationFrame(easingRef.current);
-      }
-    };
-  }, [isActive, allowMotion]);
-
-  useEffect(() => {
-    const updateMetrics = () => {
-      const viewport = window.innerWidth;
-      const text = textRef.current?.getBoundingClientRect().width ?? 0;
-      setMetrics({ viewport, text });
-    };
-    updateMetrics();
-    window.addEventListener('resize', updateMetrics);
-    let observer: ResizeObserver | null = null;
-    if (textRef.current && 'ResizeObserver' in window) {
-      observer = new ResizeObserver(updateMetrics);
-      observer.observe(textRef.current);
-    }
-    return () => {
-      window.removeEventListener('resize', updateMetrics);
-      if (observer) {
-        observer.disconnect();
-      }
-    };
-  }, []);
-
-  const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
-  const halfTravel = (metrics.viewport + metrics.text) / 2;
-  const start = halfTravel;
-  const end = -halfTravel;
-  const translateX = allowMotion
-    ? direction === 'right'
-      ? start + (end - start) * eased
-      : end + (start - end) * eased
-    : 0;
-
   return (
     <div
-      ref={containerRef}
-      className="hidden md:block relative h-32 md:h-40 overflow-hidden w-screen left-1/2 -translate-x-1/2"
+      ref={cardRef}
+      onClick={onClick}
+      className="group relative cursor-pointer flex flex-col gap-4"
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
     >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          ref={textRef}
-          className="font-display font-bold uppercase tracking-[0.35em] text-charcoal/30 dark:text-white/30 text-[clamp(48px,8vw,140px)] whitespace-nowrap"
-          style={{ transform: `translate3d(${translateX}px, 0, 0)` }}
-        >
-          INTERPHASE.ART
+      {/* Media Container */}
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-zinc-800 border border-charcoal/10 dark:border-white/10 shadow-sm transition-all duration-300 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] group-hover:-translate-y-1">
+
+        {/* Iframe Preview - Lazy Loaded */}
+        {/* Static Preview Image */}
+        <div className="absolute inset-0 w-full h-full bg-zinc-900">
+          {item.imageUrl ? (
+            <img
+              src={item.imageUrl}
+              alt={item.title}
+              className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+              loading={priority ? "eager" : "lazy"}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-zinc-700">
+              <Loader className="animate-spin text-zinc-700" size={24} />
+            </div>
+          )}
         </div>
+
+        {/* Overlay Button */}
+        <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 transition-opacity duration-300 ${isHover ? 'opacity-100' : ''}`}>
+          <button className="px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white text-sm font-bold uppercase tracking-wider hover:bg-white/30 hover:scale-105 transition-all duration-300 shadow-xl flex items-center gap-2">
+            {actionLabel}
+            <ExternalLink size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-charcoal/50 dark:text-white/50">{item.category}</span>
+          <ExternalLink size={14} className="text-charcoal/30 dark:text-white/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+        <h3 className="text-xl md:text-2xl font-display font-bold text-charcoal dark:text-white group-hover:text-brown dark:group-hover:text-neon transition-colors">
+          {item.title}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{item.description}</p>
       </div>
     </div>
   );
 };
 
-export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, outro, items }) => {
-  const [hideMobileVideos, setHideMobileVideos] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)');
-    const update = () => setIsMobile(mq.matches);
-    update();
-    if (mq.addEventListener) {
-      mq.addEventListener('change', update);
-      return () => mq.removeEventListener('change', update);
-    }
-    mq.addListener(update);
-    return () => mq.removeListener(update);
-  }, []);
+export const Portfolio: React.FC<PortfolioProps> = ({ title, subtitle, items, lang = 'en', visitLink }) => {
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
 
   return (
-    <section className="py-24 bg-transparent relative transition-colors duration-500 overflow-visible w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="relative rounded-[36px] border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/30 overflow-hidden mb-24">
-          <div className="relative z-10 grid gap-10 md:grid-cols-[1.05fr_0.95fr] items-center p-8 md:p-12">
-            <div className="space-y-6">
-              <RollingText
-                text={title + "."}
-                as="h2"
-                className="text-4xl md:text-6xl font-display font-bold text-charcoal dark:text-white tracking-tighter"
-              />
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 font-light leading-relaxed">
+    <section className="py-24 bg-transparent relative w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="max-w-3xl">
+            <Reveal>
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-2 h-2 bg-brown dark:bg-neon rounded-full" />
+                <span className="text-sm font-bold tracking-[0.2em] uppercase text-brown dark:text-neon">Selected Works</span>
+              </div>
+            </Reveal>
+            <RollingText
+              text={title}
+              as="h2"
+              className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-charcoal dark:text-white tracking-tighter mb-6"
+            />
+            <Reveal delay={0.1}>
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 font-light leading-relaxed max-w-2xl">
                 {subtitle}
               </p>
-              <button
-                type="button"
-                onClick={() => setHideMobileVideos((prev) => !prev)}
-                className="md:hidden inline-flex items-center gap-2 px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/10 bg-white/80 dark:bg-charcoal/60 text-xs uppercase tracking-[0.25em] text-charcoal/70 dark:text-white/70 transition-all duration-300 hover:text-brown dark:hover:text-neon hover:border-brown/40 dark:hover:border-neon/40"
-              >
-                {hideMobileVideos ? 'Показать видео' : 'Скрыть видео'}
-              </button>
-              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-charcoal/60 dark:text-white/60">
-                <span className="px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/15 backdrop-blur-sm">
-                  Visual Systems
-                </span>
-                <span className="px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/15 backdrop-blur-sm">
-                  Motion Preview
-                </span>
-              </div>
-            </div>
-            <div className="relative h-[300px] md:h-[360px]">
-              <div className="portfolio-orbit portfolio-orbit-lg" />
-              <div className="portfolio-orbit portfolio-orbit-md" />
-              <div className="portfolio-orbit portfolio-orbit-sm" />
-              <div className="portfolio-core" />
-              <div className="portfolio-spark" style={{ top: '12%', left: '20%' }} />
-              <div className="portfolio-spark" style={{ top: '30%', left: '75%' }} />
-              <div className="portfolio-spark" style={{ top: '58%', left: '62%' }} />
-              <div className="portfolio-spark" style={{ top: '72%', left: '28%' }} />
-              <div className="portfolio-spark" style={{ top: '45%', left: '45%' }} />
-            </div>
+            </Reveal>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 md:gap-6 pb-24">
-          {items.map((item, index) => {
-            const isEven = index % 2 === 0;
-            return (
-              <React.Fragment key={item.id}>
-                <div className="relative group py-6 md:py-8">
-                  <div className="relative w-full">
-                    <div className="relative grid gap-10 md:grid-cols-12 items-center rounded-[36px] px-4 sm:px-6 lg:px-10 py-10 md:py-16">
-                      <div className={`md:col-span-8 order-2 ${isEven ? 'md:order-1' : 'md:order-2'}`}>
-                        <ProjectMedia
-                          item={item}
-                          hideMobileVideos={hideMobileVideos}
-                          isMobileViewport={isMobile}
-                          preloadPriority={index < 1}
-                        />
-                      </div>
-                      <div className={`md:col-span-4 order-1 ${isEven ? 'md:order-2' : 'md:order-1'}`}>
-                        <div className="transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-2">
-                          <div className="space-y-5">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-charcoal/10 dark:border-white/10 bg-white/70 dark:bg-charcoal/60 text-xs uppercase tracking-[0.25em] text-charcoal/70 dark:text-white/70">
-                              {item.category}
-                            </div>
-                            <h3 className="text-3xl md:text-4xl font-display font-bold text-charcoal dark:text-white">
-                              {item.title}
-                            </h3>
-                            {item.description && (
-                              <p className="text-gray-600 dark:text-gray-300 text-base md:text-lg leading-relaxed">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {index < items.length - 1 && (
-                  <>
-                    <DividerSnakeText direction={isEven ? 'right' : 'left'} />
-                    <div className="md:hidden h-px w-full bg-charcoal/10 dark:bg-white/10" />
-                  </>
-                )}
-              </React.Fragment>
-            );
-          })}
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-16">
+          {items.map((item, index) => (
+            <Reveal key={item.id} delay={index * 0.1} width="100%">
+              <ProjectCard
+                item={item}
+                onClick={() => item.visitLink && setSelectedProject(item)}
+                priority={index < 2}
+                actionLabel={visitLink || (lang === 'ru' ? 'Смотреть сайт' : 'Visit Site')}
+              />
+            </Reveal>
+          ))}
         </div>
 
-        {outro && (
-          <Reveal variant="fade-up" width="100%">
-            <div className="text-center mt-12 md:mt-24">
-              <p className="text-lg md:text-2xl font-bold text-charcoal dark:text-white max-w-4xl mx-auto leading-relaxed">
-                {outro}
-              </p>
-            </div>
-          </Reveal>
-        )}
       </div>
+
+      {/* Modal */}
+      {selectedProject && selectedProject.visitLink && (
+        <PreviewModal
+          url={selectedProject.visitLink}
+          title={selectedProject.title}
+          image={selectedProject.imageUrl}
+          onClose={() => setSelectedProject(null)}
+          lang={lang}
+        />
+      )}
     </section>
   );
 };

@@ -75,11 +75,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       title: "Our Expertise",
       subtitle: "FULL-CYCLE SERVICES",
       items: [
-        { 
+        {
           id: 'ui-ux',
-          number: '01', 
-          title: 'UI/UX Design', 
-          shortDescription: 'Immersive, user-centric interfaces that blend aesthetics with functionality.', 
+          number: '01',
+          title: 'UI/UX Design',
+          shortDescription: 'Immersive, user-centric interfaces that blend aesthetics with functionality.',
           longDescription: 'We design digital experiences that captivate and convert. Our process involves deep user research, wireframing, and high-fidelity prototyping to ensure every interaction is intuitive and visually stunning. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['User Research & Personas', 'Wireframing & Prototyping', 'Design Systems', 'Interaction Design'],
           cta: 'Start Designing',
@@ -91,11 +91,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "How many revisions are included?", answer: "We typically include 2-3 rounds of iterations per stage to ensure the vision aligns perfectly." }
           ]
         },
-        { 
+        {
           id: 'web-dev',
-          number: '02', 
-          title: 'Web Development', 
-          shortDescription: 'From landing pages to multi-page platforms. 100% Hand-coded, no site builders.', 
+          number: '02',
+          title: 'Web Development',
+          shortDescription: 'From landing pages to multi-page platforms. 100% Hand-coded, no site builders.',
           longDescription: 'We strictly avoid site builders like Wix or Tilda. We build scalable, high-performance web solutions tailored to your business needs using pure code. Whether it is a single-page landing site or a massive enterprise portal, our code is clean, secure, and future-proof. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['Zero Site Builders (Pure Code)', 'Landing Pages & Promo Sites', 'Multi-page Corporate Sites', 'React & Next.js Architecture'],
           cta: 'Build Your Platform',
@@ -107,11 +107,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Can it handle high traffic?", answer: "Yes, because we code from scratch, we design scalable architectures capable of handling sudden spikes in user load." }
           ]
         },
-        { 
+        {
           id: 'telegram-ecosystem',
-          number: '03', 
-          title: 'Telegram Ecosystem', 
-          shortDescription: 'Full-fledged web apps and bots running directly inside Telegram.', 
+          number: '03',
+          title: 'Telegram Ecosystem',
+          shortDescription: 'Full-fledged web apps and bots running directly inside Telegram.',
           longDescription: 'Leverage the power of 800M+ users. We design and develop seamless Telegram Mini Apps (TMA) and advanced bots that function as complete products within the messenger interface. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['Telegram Mini Apps (TMA)', 'Seamless Login Integration', 'TON Wallet Connection', 'Interactive Bot Mechanics'],
           cta: 'Launch Mini App',
@@ -123,11 +123,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Can it send push notifications?", answer: "The accompanying bot can send unlimited notifications to users who have interacted with the app." }
           ]
         },
-        { 
+        {
           id: 'mobile-app',
-          number: '04', 
-          title: 'Mobile Applications', 
-          shortDescription: 'Native and cross-platform mobile solutions for iOS and Android.', 
+          number: '04',
+          title: 'Mobile Applications',
+          shortDescription: 'Native and cross-platform mobile solutions for iOS and Android.',
           longDescription: 'We create mobile applications that provide a native feel and high performance. Whether using React Native or native technologies, we ensure your app stands out in the App Store and Google Play. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['iOS & Android Development', 'React Native Solutions', 'App Store Optimization', 'Offline Functionality'],
           cta: 'Develop Mobile App',
@@ -139,11 +139,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "How long does development take?", answer: "A typical MVP mobile app takes 3-5 months from concept to launch." }
           ]
         },
-        { 
+        {
           id: 'brand-identity',
-          number: '05', 
-          title: 'Brand Identity', 
-          shortDescription: 'Strategic branding that defines your voice in the market.', 
+          number: '05',
+          title: 'Brand Identity',
+          shortDescription: 'Strategic branding that defines your voice in the market.',
           longDescription: 'A brand is more than a logo. We build comprehensive visual identity systems, including typography, color palettes, and tone of voice, to create a cohesive and memorable brand presence. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['Logo Design', 'Visual Identity Systems', 'Brand Guidelines', 'Marketing Collateral'],
           cta: 'Define Your Brand',
@@ -155,11 +155,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Do you design social media assets?", answer: "Yes, we can create templates for Instagram, LinkedIn, and other platforms." }
           ]
         },
-        { 
+        {
           id: 'complex-integrations',
-          number: '06', 
-          title: 'Complex Integrations', 
-          shortDescription: 'Connecting disparate systems into a unified workflow.', 
+          number: '06',
+          title: 'Complex Integrations',
+          shortDescription: 'Connecting disparate systems into a unified workflow.',
           longDescription: 'We specialize in API orchestration and connecting third-party services. Whether it is CRM, ERP, or payment gateways, we ensure your digital ecosystem flows without interruption. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['API Development', 'CRM/ERP Synchronization', 'Payment Gateway Setup', 'Cloud Infrastructure'],
           cta: 'Integrate Systems',
@@ -171,11 +171,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Do you support legacy systems?", answer: "We can wrap legacy systems in modern API layers to make them usable with new tech." }
           ]
         },
-        { 
+        {
           id: 'ai-agent',
-          number: '07', 
-          title: 'AI Agent Creation', 
-          shortDescription: 'Autonomous assistants that work with your data, tools, and workflows.', 
+          number: '07',
+          title: 'AI Agent Creation',
+          shortDescription: 'Autonomous assistants that work with your data, tools, and workflows.',
           longDescription: 'We design and build AI agents that execute tasks, communicate with your stack, and deliver measurable business outcomes. From LLM orchestration to secure tool access and monitoring, we create reliable agents that operate safely and efficiently. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['LLM Strategy & Architecture', 'Tool & API Orchestration', 'Secure Data Connectors', 'Agent Monitoring & Guardrails'],
           cta: 'Launch AI Agent',
@@ -187,11 +187,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Can it be multilingual?", answer: "Yes, agents can be configured for multilingual support and localized outputs." }
           ]
         },
-        { 
+        {
           id: 'seo-geo',
-          number: '08', 
-          title: 'SEO & GEO Turnkey', 
-          shortDescription: 'SEO, GEO, and promotion built to win search and AI answers.', 
+          number: '08',
+          title: 'SEO & GEO Turnkey',
+          shortDescription: 'SEO, GEO, and promotion built to win search and AI answers.',
           longDescription: 'We build a full visibility system: technical SEO, semantic content, brand entity development, and GEO (Generative Engine Optimization) so your brand appears in AI answers and wins clicks. We combine architecture, performance, and promotion to grow qualified traffic and conversions. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: [
             'Technical SEO Audits & Fixes',
@@ -212,11 +212,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Will you write content?", answer: "Yes, we create or refine content based on intent mapping, semantic clusters, and AI-friendly structure." }
           ]
         },
-         { 
+        {
           id: 'reputation-guard',
-          number: '09', 
-          title: 'Reputation Guard', 
-          shortDescription: 'Digital footprint management and brand protection strategies.', 
+          number: '09',
+          title: 'Reputation Guard',
+          shortDescription: 'Digital footprint management and brand protection strategies.',
           longDescription: 'Your reputation is your currency. We implement SEO strategies and content monitoring to ensure your brand is perceived exactly how you intend across the digital landscape. We have an individual approach to each client, all conditions are specifically discussed at the brief.',
           features: ['SERP Management', 'Review Monitoring', 'Crisis Management', 'Positive Content Seeding'],
           cta: 'Protect Brand',
@@ -236,45 +236,37 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       outro: "Your business awaits design and code from our experts!",
       visitLink: "VISIT SITE",
       items: [
-        { 
-          id: '2', 
-          title: 'StroyMaster Pro', 
-          category: 'Construction', 
+        {
+          id: '2',
+          title: 'StroyMaster Pro',
+          category: 'Construction',
+          visitLink: '/projects/building1/dist/index.html',
           videoDesktopUrl: '/stroymasterprodesctop.mov',
           videoMobileUrl: '/stroymasterpromob.mp4',
-          description: 'Full-cycle construction and renovation services. From architectural design to turnkey delivery with fixed pricing. We were tasked with building a simple and clear functional landing page, while clearly pointing the user to discounts and special offers. The client was more than satisfied.'
+          imageUrl: '/previews/stroymaster.png',
+          description: 'Architectural precision. Turnkey construction with fixed pricing. A high-conversion landing page that builds trust instantly.'
         },
-        { 
-          id: '1', 
-          title: 'ELEUSIS', 
-          category: 'Gaming & Esports', 
+        {
+          id: '1',
+          title: 'ELEUSIS',
+          category: 'Gaming & Esports',
+          visitLink: '/projects/eleusus/dist/index.html',
           videoDesktopUrl: '/eleusisdesctop.mov',
           videoMobileUrl: '/eleusuismob.mp4',
-          description: 'The ultimate gaming sanctuary. CS2, Dota 2, Valorant tournaments and hardware arsenal. We were tasked with making the site bright and memorable for gamers, resulting in a 29% increase in conversion.'
+          imageUrl: '/previews/eleusis.png',
+          description: 'Cyberpunk aesthetics for the esports elite. A high-performance tournament platform that boosted conversion by 29%.'
         },
-        { 
-          id: '5', 
-          title: 'Fourth International', 
-          category: 'Education & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesktop.mp4',
-          videoMobileUrl: '/forthinternationalmob.mp4',
-          description: 'Language school and academic community focusing on Chinese, Arabic, and English with cultural immersion. During creation, we integrated a complex system of courses, student and teacher accounts, and a payment system link. A demo version is presented on our site as an NDA was signed. The site successfully implements a complex of educational technologies.'
-        },
-        { 
-          id: '6', 
-          title: 'Monday Magazine', 
-          category: 'Digital Media', 
-          videoDesktopUrl: '/mondaydesctop.mp4',
-          videoMobileUrl: '/mondaymob.mp4',
-          description: 'A digital cultural magazine focusing on visual aesthetics and modern culture. Real-time content parsing from the database to the site was implemented. As a result - stylish work without glitches.'
-        },
-        { 
-          id: '7', 
-          title: '388.nail', 
-          category: 'Beauty & Wellness', 
+
+
+        {
+          id: '7',
+          title: '388.nail',
+          category: 'Beauty & Wellness',
+          visitLink: '/projects/388/dist/index.html',
           videoDesktopUrl: '/388desctop.mp4',
           videoMobileUrl: '/388mob.mp4',
-          description: 'A tropical paradise in the city. We created a digital experience that reflects their "mini-vacation" concept, bringing the Bali jungle vibes to the web.'
+          imageUrl: '/previews/388.png',
+          description: 'Digital tropical escape. A visual journey converting a beauty salon into a mini-vacation experience.'
         },
       ]
     },
@@ -368,6 +360,17 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       submit: "Send Message",
       telegramButton: "Contact via Telegram",
       telegramLink: "https://t.me/interphase_art",
+      budgetLabel: "Estimated Budget",
+      budgetOptions: ["< $1k", "$1k - $5k", "$5k - $10k", "> $10k"],
+      description: "Ready to start your next project? Fill out the form below or contact us directly via Telegram.",
+      namePlaceholder: "John Doe",
+      emailPlaceholder: "john@example.com",
+      messagePlaceholder: "Tell us about your project specifics...",
+      acceptingProjects: "Currently accepting new projects",
+      transmitting: "Transmitting...",
+      sentSuccess: "Message sent successfully!",
+      sendFailed: "Sending Failed",
+      retry: "Retry",
     },
     footer: {
       sitemapTitle: "Sitemap",
@@ -378,35 +381,35 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       developedBy: "Developed by Interphase Core",
     },
     privacy: {
-        title: "Privacy Policy",
-        lastUpdated: "Last Updated: December 2024",
-        back: "Back to Home",
-        blocks: [
-          {
-            title: "1. Introduction",
-            content: `<p>Interphase ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website.</p>`
-          },
-          {
-            title: "2. Information We Collect",
-            content: `<p>We may collect personal information that you voluntarily provide to us when you fill out contact forms, such as your name, email address, and project details.</p>`
-          },
-          {
-            title: "3. Cookies and Local Storage",
-            content: `<p>We use Local Storage to enhance your experience, specifically to remember your language preferences and theme settings (Light/Dark mode). We do not use third-party tracking cookies.</p>`
-          },
-          {
-            title: "4. Use of Information",
-            content: `<p>The information we collect is used solely to communicate with you regarding your inquiries, provide our services, and improve website performance.</p>`
-          },
-          {
-            title: "5. Data Security",
-            content: `<p>We implement appropriate technical and organizational security measures to protect your personal data against unauthorized access or alteration.</p>`
-          },
-          {
-            title: "6. Contact Us",
-            content: `<p>If you have questions about this Privacy Policy, please contact us via Telegram or Email provided in the contact section.</p>`
-          }
-        ]
+      title: "Privacy Policy",
+      lastUpdated: "Last Updated: December 2024",
+      back: "Back to Home",
+      blocks: [
+        {
+          title: "1. Introduction",
+          content: `<p>Interphase ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website.</p>`
+        },
+        {
+          title: "2. Information We Collect",
+          content: `<p>We may collect personal information that you voluntarily provide to us when you fill out contact forms, such as your name, email address, and project details.</p>`
+        },
+        {
+          title: "3. Cookies and Local Storage",
+          content: `<p>We use Local Storage to enhance your experience, specifically to remember your language preferences and theme settings (Light/Dark mode). We do not use third-party tracking cookies.</p>`
+        },
+        {
+          title: "4. Use of Information",
+          content: `<p>The information we collect is used solely to communicate with you regarding your inquiries, provide our services, and improve website performance.</p>`
+        },
+        {
+          title: "5. Data Security",
+          content: `<p>We implement appropriate technical and organizational security measures to protect your personal data against unauthorized access or alteration.</p>`
+        },
+        {
+          title: "6. Contact Us",
+          content: `<p>If you have questions about this Privacy Policy, please contact us via Telegram or Email provided in the contact section.</p>`
+        }
+      ]
     },
   },
   ru: {
@@ -482,11 +485,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       title: "Наши Услуги",
       subtitle: "ПОЛНЫЙ ЦИКЛ УСЛУГ",
       items: [
-        { 
+        {
           id: 'ui-ux',
-          number: '01', 
-          title: 'UI/UX Дизайн', 
-          shortDescription: 'Иммерсивные интерфейсы, объединяющие эстетику и функциональность.', 
+          number: '01',
+          title: 'UI/UX Дизайн',
+          shortDescription: 'Иммерсивные интерфейсы, объединяющие эстетику и функциональность.',
           longDescription: 'Мы создаем цифровой опыт, который привлекает и конвертирует. Наш процесс включает глубокое исследование пользователей, вайрфрейминг и прототипирование высокой точности. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
           features: ['UX Исследования', 'Прототипирование', 'Дизайн-системы', 'Дизайн взаимодействия'],
           cta: 'Начать Дизайн',
@@ -498,11 +501,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Сколько правок включено?", answer: "Обычно мы включаем 2-3 итерации правок на каждом этапе." }
           ]
         },
-        { 
+        {
           id: 'web-dev',
-          number: '02', 
-          title: 'Веб-Разработка', 
-          shortDescription: 'От продающих лендингов до многостраничных платформ. Только код, никаких конструкторов.', 
+          number: '02',
+          title: 'Веб-Разработка',
+          shortDescription: 'От продающих лендингов до многостраничных платформ. Только код, никаких конструкторов.',
           longDescription: 'Мы не работаем на конструкторах (Tilda, Wix). Мы создаем масштабируемые и высокопроизводительные веб-решения, написанные вручную. Будь то одностраничный лендинг или масштабный портал — наш код чистый, безопасный и принадлежит вам. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
           features: ['Без конструкторов (Чистый код)', 'Лендинги и Промо-сайты', 'Многостраничные порталы', 'Архитектура на React & Next.js'],
           cta: 'Создать Платформу',
@@ -514,11 +517,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Выдержит ли сайт нагрузки?", answer: "Да, так как мы пишем код с нуля, мы проектируем архитектуру, готовую к любым нагрузкам." }
           ]
         },
-        { 
+        {
           id: 'telegram-ecosystem',
-          number: '03', 
-          title: 'Экосистема Telegram', 
-          shortDescription: 'Полноценные веб-приложения и боты внутри Telegram.', 
+          number: '03',
+          title: 'Экосистема Telegram',
+          shortDescription: 'Полноценные веб-приложения и боты внутри Telegram.',
           longDescription: 'Используйте мощь 800M+ пользователей. Мы проектируем и разрабатываем бесшовные Telegram Mini Apps (TMA) и продвинутых ботов, работающих как полноценные продукты. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
           features: ['Telegram Mini Apps (TMA)', 'Бесшовная интеграция входа', 'Подключение TON Wallet', 'Интерактивные механики'],
           cta: 'Запустить Mini App',
@@ -530,11 +533,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Можно слать уведомления?", answer: "Бот-компаньон может отправлять неограниченные уведомления пользователям, взаимодействовавшим с приложением." }
           ]
         },
-        { 
+        {
           id: 'mobile-app',
-          number: '04', 
-          title: 'Мобильные Приложения', 
-          shortDescription: 'Нативные и кроссплатформенные решения для iOS и Android.', 
+          number: '04',
+          title: 'Мобильные Приложения',
+          shortDescription: 'Нативные и кроссплатформенные решения для iOS и Android.',
           longDescription: 'Мы создаем мобильные приложения с нативным откликом и высокой производительностью. React Native или нативная разработка — ваше приложение будет выделяться в сторах. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
           features: ['Разработка под iOS и Android', 'React Native', 'ASO Оптимизация', 'Оффлайн режим'],
           cta: 'Разработать Приложение',
@@ -546,11 +549,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Сколько времени занимает?", answer: "Типичное MVP мобильного приложения занимает 3-5 месяцев." }
           ]
         },
-        { 
+        {
           id: 'brand-identity',
-          number: '05', 
-          title: 'Брендинг', 
-          shortDescription: 'Стратегический брендинг, определяющий ваш голос на рынке.', 
+          number: '05',
+          title: 'Брендинг',
+          shortDescription: 'Стратегический брендинг, определяющий ваш голос на рынке.',
           longDescription: 'Бренд — это больше, чем логотип. Мы создаем комплексные системы визуальной идентификации, включая типографику, цветовые палитры и tone of voice.',
           features: ['Логотипы', 'Айдентика', 'Брендбуки', 'Маркетинговые материалы'],
           cta: 'Создать Бренд',
@@ -562,11 +565,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Делаете дизайн для соцсетей?", answer: "Да, мы создаем шаблоны для Instagram, LinkedIn и других платформ." }
           ]
         },
-        { 
+        {
           id: 'complex-integrations',
-          number: '06', 
-          title: 'Сложные Интеграции', 
-          shortDescription: 'Объединение разрозненных систем в единый рабочий процесс.', 
+          number: '06',
+          title: 'Сложные Интеграции',
+          shortDescription: 'Объединение разрозненных систем в единый рабочий процесс.',
           longDescription: 'Мы специализируемся на оркестрации API и подключении сторонних сервисов. Будь то CRM, ERP, или платежные шлюзы, мы обеспечиваем бесперебойную работу вашей цифровой экосистемы.',
           features: ['Разработка API', 'Синхронизация CRM/ERP', 'Настройка платежных шлюзов', 'Облачная инфраструктура'],
           cta: 'Интегрировать Системы',
@@ -578,11 +581,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Поддерживаете старые системы?", answer: "Мы можем 'обернуть' легаси системы в современные API слои." }
           ]
         },
-        { 
+        {
           id: 'ai-agent',
-          number: '07', 
-          title: 'Создание AI-агента', 
-          shortDescription: 'Автономные ассистенты, работающие с вашими данными и инструментами.', 
+          number: '07',
+          title: 'Создание AI-агента',
+          shortDescription: 'Автономные ассистенты, работающие с вашими данными и инструментами.',
           longDescription: 'Мы проектируем и создаем AI-агентов, которые выполняют задачи, общаются с вашими системами и дают измеримый бизнес-эффект. От оркестрации LLM до безопасного доступа к инструментам и мониторинга — мы строим надежных агентов для реальной нагрузки. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
           features: ['Стратегия LLM и архитектура', 'Оркестрация инструментов и API', 'Безопасные коннекторы данных', 'Мониторинг и контуры безопасности'],
           cta: 'Запустить AI-агента',
@@ -594,11 +597,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Можно сделать мульти-язычный агент?", answer: "Да, мы настраиваем локализацию и многоязычную поддержку." }
           ]
         },
-        { 
+        {
           id: 'seo-geo',
-          number: '08', 
-          title: 'SEO&GEO под ключ', 
-          shortDescription: 'SEO, GEO и продвижение для роста в поиске и AI-ответах.', 
+          number: '08',
+          title: 'SEO&GEO под ключ',
+          shortDescription: 'SEO, GEO и продвижение для роста в поиске и AI-ответах.',
           longDescription: 'Мы выстраиваем полный контур видимости: технический SEO, семантический контент, развитие сущностей бренда и GEO (Generative Engine Optimization), чтобы вас цитировали в генеративных ответах и чаще выбирали в выдаче. Синхронизируем архитектуру, скорость и продвижение для роста целевого трафика и заявок.',
           features: [
             'Технический SEO аудит и исправления',
@@ -619,11 +622,11 @@ export const CONTENT: Record<Language, ContentDictionary> = {
             { question: "Вы пишете контент?", answer: "Да, создаем и улучшаем контент на основе интент-кластеров, семантики и AI-структуры." }
           ]
         },
-         { 
+        {
           id: 'reputation-guard',
-          number: '09', 
-          title: 'Защита Репутации', 
-          shortDescription: 'Управление цифровым следом и стратегии защиты бренда.', 
+          number: '09',
+          title: 'Защита Репутации',
+          shortDescription: 'Управление цифровым следом и стратегии защиты бренда.',
           longDescription: 'Ваша репутация — это ваша валюта. Мы внедряем SEO-стратегии и мониторинг контента, чтобы ваш бренд воспринимался именно так, как вы задумали. Мы имеем индивидуальный подход к каждому клиенту, все условия конкретно обговариваются на брифе.',
           features: ['Управление выдачей (SERP)', 'Мониторинг отзывов', 'Антикризисный менеджмент', 'Посев позитивного контента'],
           cta: 'Защитить Бренд',
@@ -643,45 +646,37 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       outro: "Ваш бизнес ждет дизайн и код от наших дизайнеров и программистов!",
       visitLink: "СМОТРЕТЬ САЙТ",
       items: [
-        { 
-          id: '2', 
-          title: 'StroyMaster Pro', 
-          category: 'Строительство', 
+        {
+          id: '2',
+          title: 'StroyMaster Pro',
+          category: 'Строительство',
+          visitLink: '/projects/building1/dist/index.html',
           videoDesktopUrl: '/stroymasterprodesctop.mov',
           videoMobileUrl: '/stroymasterpromob.mp4',
-          description: 'Полный цикл строительных и ремонтных работ. От архитектурного проекта до сдачи под ключ с фиксированной ценой. Перед нами стояла задача построить простой и понятный функциональный лендинг, при этом явно указав пользователю на скидки и спецпредложения. Клиент остался более чем доволен.'
+          imageUrl: '/previews/stroymaster.png',
+          description: 'Архитектурная точность. Строительство под ключ с фиксированной сметой. Высококонверсионный лендинг, вызывающий доверие с первого взгляда.'
         },
-        { 
-          id: '1', 
-          title: 'ELEUSIS', 
-          category: 'Гейминг & Киберспорт', 
+        {
+          id: '1',
+          title: 'ELEUSIS',
+          category: 'Гейминг & Киберспорт',
+          visitLink: '/projects/eleusus/dist/index.html',
           videoDesktopUrl: '/eleusisdesctop.mov',
           videoMobileUrl: '/eleusuismob.mp4',
-          description: 'Ультимативное игровое пространство. Турниры по CS2, Dota 2, Valorant и топовое железо. Перед нами стояла задача сделать сайт ярким и запоминающимся для геймеров, итогом стало повышение конверсии на 29%'
+          imageUrl: '/previews/eleusis.png',
+          description: 'Киберпанк-эстетика для элиты киберспорта. Высокопроизводительная турнирная платформа, поднявшая конверсию на 29%.'
         },
-        { 
-          id: '5', 
-          title: 'Четвертый Интернационал', 
-          category: 'Образование & EdTech', 
-          videoDesktopUrl: '/forthinternationaldesktop.mp4',
-          videoMobileUrl: '/forthinternationalmob.mp4',
-          description: 'Школа языков и академическое сообщество. Китайский, арабский и английский с культурным погружением. В ходе создания мы интегрировали сложную систему курсов, аккаунтов студентов и преподавателей и ссылку на платежную систему. На нашем сайте предоставлен демо-вариант сайта, так как был подписан NDA. Сайт успешно реализует комплекс образовательных технологий.'
-        },
-        { 
-          id: '6', 
-          title: 'Понедельник', 
-          category: 'Digital Медиа', 
-          videoDesktopUrl: '/mondaydesctop.mp4',
-          videoMobileUrl: '/mondaymob.mp4',
-          description: 'Цифровой журнал о культуре и визуальной эстетике. Современный взгляд на искусство и дизайн. Был реализован парсинг контента с базы данных на сайт в реальном времени. Как итог - стильная работа без сбоев.'
-        },
-        { 
-          id: '7', 
-          title: '388.nail', 
-          category: 'Красота и Здоровье', 
+
+
+        {
+          id: '7',
+          title: '388.nail',
+          category: 'Красота и Здоровье',
+          visitLink: '/projects/388/dist/index.html',
           videoDesktopUrl: '/388desctop.mp4',
           videoMobileUrl: '/388mob.mp4',
-          description: 'Тропический рай в городе. Мы создали цифровой опыт, отражающий концепцию "мини-отпуска", перенеся атмосферу джунглей Бали в веб.'
+          imageUrl: '/previews/388.png',
+          description: 'Цифровой тропический побег. Визуальное путешествие, превращающее салон красоты в мини-отпуск.'
         },
       ]
     },
@@ -775,6 +770,17 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       submit: "Отправить",
       telegramButton: "Написать в Telegram",
       telegramLink: "https://t.me/interphase_art",
+      budgetLabel: "Примерный Бюджет",
+      budgetOptions: ["< 100k ₽", "100k - 500k ₽", "500k - 1M ₽", "> 1M ₽"],
+      description: "Готовы начать следующий проект? Заполните форму или напишите нам в Telegram.",
+      namePlaceholder: "Иван Иванов",
+      emailPlaceholder: "ivan@example.com",
+      messagePlaceholder: "Расскажите о деталях проекта...",
+      acceptingProjects: "Принимаем заявки на новые проекты",
+      transmitting: "Отправка...",
+      sentSuccess: "Сообщение отправлено!",
+      sendFailed: "Ошибка отправки",
+      retry: "Повторить",
     },
     footer: {
       sitemapTitle: "Карта Сайта",
@@ -785,30 +791,30 @@ export const CONTENT: Record<Language, ContentDictionary> = {
       developedBy: "Разработано Interphase Core",
     },
     privacy: {
-        title: "Политика в отношении обработки персональных данных",
-        lastUpdated: "Последнее обновление: Декабрь 2024",
-        back: "На Главную",
-        blocks: [
-          {
-            title: "Введение",
-            content: `
+      title: "Политика в отношении обработки персональных данных",
+      lastUpdated: "Последнее обновление: Декабрь 2024",
+      back: "На Главную",
+      blocks: [
+        {
+          title: "Введение",
+          content: `
               <p>Компания <strong>Interphase</strong> уделяет особое внимание защите вашей конфиденциальности. Мы стремимся обеспечить прозрачность и безопасность в отношении любой информации, которую вы предоставляете нам при использовании нашего веб-сайта (далее – «Сайт»), его сервисов, программ и связанных с ним услуг.</p>
               <p>Использование сервисов Сайта означает безоговорочное согласие Пользователя с настоящей Политикой; в случае несогласия Пользователь должен воздержаться от использования сервисов.</p>
             `
-          },
-          {
-            title: "01. Общие положения",
-            content: `
+        },
+        {
+          title: "01. Общие положения",
+          content: `
               <p>1.1. В данной Политике под понятием «персональная информация Пользователя» понимаются следующие аспекты:</p>
               <p>1.1.1. Персональная информация, которую Пользователь предоставляет о себе самостоятельно при заполнении и отправке форм заявок, подписки на обновления или при использовании Сервисов. Эта информация включает в себя персональные данные Пользователя. Некоторая информация, необходимая для предоставления Сервисов, обязательно помечена специальным образом. В то же время, Пользователь вправе предоставлять иной информации по своему усмотрению.</p>
               <p>1.1.2. Данные, которые автоматически передаются сервисам Сайта в ходе их использования при помощи установленного на устройстве Пользователя программного обеспечения. Эти данные включают в себя IP-адрес, информацию о файлах cookie, сведения о браузере Пользователя (или другой программе, используемой для доступа к сервисам), технические характеристики оборудования и программного обеспечения, используемых Пользователем, а также дату и время доступа к сервисам, адреса запрашиваемых страниц и подобную информацию.</p>
               <p>1.1.3. Прочая информация о Пользователе, обработка которой предусмотрена в Соглашении об использовании Сайта.</p>
               <p>1.1.4. Настоящая Политика конфиденциальности применяется исключительно к Сайту. Компания не контролирует и не несет ответственности за сайты третьих лиц, на которые Пользователь может перейти по ссылкам, доступным на Сайте.</p>
             `
-          },
-          {
-            title: "02. Цели обработки персональной информации пользователей",
-            content: `
+        },
+        {
+          title: "02. Цели обработки персональной информации пользователей",
+          content: `
               <p>Мы используем собранную информацию для следующих целей:</p>
               <ul class="list-disc pl-5 mt-2 space-y-1">
                 <li>Предоставление вам запрашиваемых услуг и обратной связи.</li>
@@ -818,10 +824,10 @@ export const CONTENT: Record<Language, ContentDictionary> = {
               </ul>
               <p>Мы не продаем, не обмениваем и не передаем вашу личную информацию третьим лицам без вашего согласия, за исключением случаев, предусмотренных законодательством.</p>
             `
-          },
-          {
-            title: "03. Основные права и обязанности Оператора",
-            content: `
+        },
+        {
+          title: "03. Основные права и обязанности Оператора",
+          content: `
               <p>3.1. Оператор имеет право:</p>
               <ul class="list-disc pl-5 mt-2 space-y-1">
                 <li>получать от субъекта персональных данных достоверные информацию и/или документы, содержащие персональные данные;</li>
@@ -840,10 +846,10 @@ export const CONTENT: Record<Language, ContentDictionary> = {
                 <li>исполнять иные обязанности, предусмотренные Законом о персональных данных.</li>
               </ul>
             `
-          },
-          {
-            title: "04. Принципы обработки персональных данных",
-            content: `
+        },
+        {
+          title: "04. Принципы обработки персональных данных",
+          content: `
               <p>4.1. Обработка персональных данных осуществляется на законной основе.</p>
               <p>4.2. Обработке подлежат только персональные данные, которые отвечают целям их обработки.</p>
               <p>4.3. Содержание и объем обрабатываемых персональных данных соответствуют заявленным целям обработки. Не допускается избыточность обрабатываемых персональных данных по отношению к заявленным целям их обработки.</p>
@@ -851,32 +857,32 @@ export const CONTENT: Record<Language, ContentDictionary> = {
               <p>4.5. Хранение персональных данных осуществляется в форме, позволяющей определить субъекта персональных данных, не дольше, чем этого требуют цели обработки персональных данных, если срок хранения персональных данных не установлен федеральным законом, договором, стороной которого, выгодоприобретателем или поручителем по которому является субъект персональных данных.</p>
               <p>4.6. Обрабатываемые персональные данные уничтожаются либо обезличиваются по достижении целей обработки или в случае утраты необходимости в достижении этих целей, если иное не предусмотрено федеральным законом.</p>
             `
-          },
-          {
-            title: "05. Порядок сбора, хранения, передачи и других видов обработки персональных данных",
-            content: `
+        },
+        {
+          title: "05. Порядок сбора, хранения, передачи и других видов обработки персональных данных",
+          content: `
               <p>5.1. Оператор обеспечивает сохранность персональных данных и принимает все возможные меры, исключающие доступ к персональным данным неуполномоченных лиц.</p>
               <p>5.2. Персональные данные Пользователя никогда, ни при каких условиях не будут переданы третьим лицам, за исключением случаев, связанных с исполнением действующего законодательства либо в случае, если субъектом персональных данных дано согласие Оператору на передачу данных третьему лицу для исполнения обязательств по гражданско-правовому договору.</p>
               <p>5.3. В случае выявления неточностей в персональных данных, Пользователь может актуализировать их самостоятельно, путем направления Оператору уведомление на адрес электронной почты Оператора <a href="mailto:bushuev@interphase.pro" class="text-brown dark:text-neon hover:underline">bushuev@interphase.pro</a> с пометкой «Актуализация персональных данных».</p>
               <p>5.4. Пользователь может в любой момент отозвать свое согласие на обработку персональных данных, направив Оператору уведомление посредством электронной почты на электронный адрес Оператора <a href="mailto:bushuev@interphase.pro" class="text-brown dark:text-neon hover:underline">bushuev@interphase.pro</a> с пометкой «Отзыв согласия на обработку персональных данных».</p>
               <p>5.5. Условием прекращения обработки персональных данных может являться достижение целей обработки персональных данных, истечение срока действия согласия субъекта персональных данных, отзыв согласия субъектом персональных данных или требование о прекращении обработки персональных данных, а также выявление неправомерной обработки персональных данных.</p>
             `
-          },
-          {
-            title: "06. Перечень действий, производимых Оператором с полученными персональными данными",
-            content: `
+        },
+        {
+          title: "06. Перечень действий, производимых Оператором с полученными персональными данными",
+          content: `
               <p>6.1. Оператор осуществляет сбор, запись, систематизацию, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передачу (распространение, предоставление, доступ), обезличивание, блокирование, удаление и уничтожение персональных данных.</p>
             `
-          },
-          {
-            title: "07. Конфиденциальность персональных данных",
-            content: `
+        },
+        {
+          title: "07. Конфиденциальность персональных данных",
+          content: `
               <p>Оператор и иные лица, получившие доступ к персональным данным, обязаны не раскрывать третьим лицам и не распространять персональные данные без согласия субъекта персональных данных, если иное не предусмотрено федеральным законом.</p>
               <p>Пользователь может получить любые разъяснения по интересующим вопросам, касающимся обработки его персональных данных, обратившись к Оператору с помощью телеграм <a href="https://t.me/interphase_art" target="_blank" rel="noopener noreferrer" class="text-brown dark:text-neon hover:underline">@interphase_art</a>.</p>
               <p>В данном документе будут отражены любые изменения политики обработки персональных данных Оператором. Политика действует бессрочно до замены ее новой версией.</p>
             `
-          }
-        ]
+        }
+      ]
     }
   }
 };

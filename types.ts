@@ -45,6 +45,7 @@ export interface ProjectItem {
   videoDesktopUrl: string;
   videoMobileUrl: string;
   imageUrl?: string;
+  visitLink?: string;
 }
 
 export interface BlogPost {
@@ -175,6 +176,17 @@ export interface ContentDictionary {
     submit: string;
     telegramButton: string;
     telegramLink: string;
+    budgetLabel: string;
+    budgetOptions: string[];
+    description: string;
+    namePlaceholder: string;
+    emailPlaceholder: string;
+    messagePlaceholder: string;
+    acceptingProjects: string;
+    transmitting: string;
+    sentSuccess: string;
+    sendFailed: string;
+    retry: string;
   };
   footer: FooterContent;
   privacy: PrivacyContent;

@@ -35,8 +35,8 @@ const ScrollToTop = () => {
 };
 
 // Wrapper for Home to use useNavigate
-const HomePage: React.FC<{ 
-  lang: Language; 
+const HomePage: React.FC<{
+  lang: Language;
   setLang: (lang: Language) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
@@ -45,48 +45,49 @@ const HomePage: React.FC<{
   const navigate = useNavigate();
   const content = CONTENT[lang];
   const latestPosts = (blogPosts.length ? blogPosts : content.blog.items).slice(0, 3);
-  
+
   const scrollToServices = () => {
     const servicesSection = document.getElementById('services-section');
     if (servicesSection) {
-        servicesSection.scrollIntoView({ behavior: 'smooth' });
+      servicesSection.scrollIntoView({ behavior: 'smooth' });
     } else {
-        navigate('/services');
+      navigate('/services');
     }
   };
 
   return (
     <>
-      <Hero 
-        title={content.hero.title} 
-        subtitle={content.hero.subtitle} 
-        cta={content.hero.cta} 
+      <Hero
+        title={content.hero.title}
+        subtitle={content.hero.subtitle}
+        cta={content.hero.cta}
         onExplore={scrollToServices}
       />
-      <About 
-        content={content.about} 
-        onScrollDown={scrollToServices} 
+      <About
+        content={content.about}
+        onScrollDown={scrollToServices}
         lang={lang}
         setLang={setLang}
         theme={theme}
         toggleTheme={toggleTheme}
       />
       <div id="services-section">
-          <Services 
-            title={content.services.title} 
-            subtitle={content.services.subtitle} 
-            items={content.services.items} 
-            ui={content.ui}
-            onNavigate={(path) => navigate(path)}
-          />
+        <Services
+          title={content.services.title}
+          subtitle={content.services.subtitle}
+          items={content.services.items}
+          ui={content.ui}
+          onNavigate={(path) => navigate(path)}
+        />
       </div>
       <Process content={content.process} />
-      <Portfolio 
-        title={content.portfolio.title} 
-        subtitle={content.portfolio.subtitle} 
+      <Portfolio
+        title={content.portfolio.title}
+        subtitle={content.portfolio.subtitle}
         outro={content.portfolio.outro}
         items={content.portfolio.items}
         visitLink={content.portfolio.visitLink}
+        lang={lang}
       />
       <section className="py-24 bg-transparent relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -147,13 +148,12 @@ const HomePage: React.FC<{
           </div>
         </div>
       </section>
-      <FAQ 
-        title={content.generalFaq.title} 
-        subtitle={content.generalFaq.subtitle} 
-        items={content.generalFaq.items} 
+      <FAQ
+        title={content.generalFaq.title}
+        subtitle={content.generalFaq.subtitle}
+        items={content.generalFaq.items}
         ui={content.ui}
       />
-      <Contact text={content.contact} onSubmitEffect={() => {}} />
     </>
   );
 };
@@ -177,7 +177,7 @@ function AppContent() {
       if (savedLang && (savedLang === 'en' || savedLang === 'ru')) {
         return savedLang;
       }
-      
+
       const browserLang = navigator.language;
       if (browserLang && browserLang.toLowerCase().startsWith('ru')) {
         return 'ru';
@@ -254,7 +254,7 @@ function AppContent() {
 
   useEffect(() => {
     loadPosts();
-    
+
     // Subscribe to real-time updates
     const subscription = blogService.subscribe(() => {
       loadPosts();
@@ -268,39 +268,42 @@ function AppContent() {
   }, []);
 
   const content = CONTENT[lang];
-  
+
   // Use ONLY fetched posts
   const blogContent = { ...content.blog, items: blogPosts };
 
   return (
     <div className={`min-h-screen transition-colors duration-500 relative overflow-x-hidden ${theme === 'dark' ? 'bg-dark text-white selection:bg-neon selection:text-black' : 'bg-bone text-charcoal selection:bg-brown selection:text-white'}`}>
-        
-        {loading && <Preloader text={content.ui.initializing} onComplete={() => setLoading(false)} />}
 
-        <ScrollToTop />
-        {!isAdmin && <Navbar items={content.nav} lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} ui={content.ui} />}
-        
-        <Routes>
-          <Route path="/" element={<HomePage lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} blogPosts={blogPosts} />} />
-          <Route path="/services" element={<Services title={content.services.title} subtitle={content.services.subtitle} items={content.services.items} ui={content.ui} onNavigate={(path) => navigate(path)} />} />
-          <Route path="/services/:id" element={<ServiceDetail items={content.services.items} ui={content.ui} onContact={() => navigate('/contact')} />} />
-          <Route path="/journal" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => {}} />} />
-          <Route path="/blog" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => {}} />} />
-          <Route path="/blog/:id" element={<BlogDetail content={blogContent} ui={content.ui} />} />
-          <Route path="/privacy" element={<PrivacyPolicy content={content.privacy} />} />
-          <Route path="/portfolio" element={<div className="pt-20 min-h-screen"><Portfolio title={content.portfolio.title} subtitle={content.portfolio.subtitle} outro={content.portfolio.outro} items={content.portfolio.items} visitLink={content.portfolio.visitLink} /></div>} />
-          <Route path="/contact" element={<div className="pt-20 min-h-screen"><Contact text={content.contact} onSubmitEffect={() => {}} /></div>} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
-          <Route path="/admin/blog/edit/:id" element={<AdminBlogEditor />} />
-        </Routes>
+      {loading && <Preloader text={content.ui.initializing} onComplete={() => setLoading(false)} />}
 
-        {!isAdmin && <Footer content={content.footer} navItems={content.nav} />}
-        {!isAdmin && <FooterLabel />}
-        {!isAdmin && <BackToTop />}
+      <ScrollToTop />
+      {!isAdmin && <Navbar items={content.nav} lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} ui={content.ui} />}
+
+      <Routes>
+        <Route path="/" element={<HomePage lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} blogPosts={blogPosts} />} />
+        <Route path="/services" element={<Services title={content.services.title} subtitle={content.services.subtitle} items={content.services.items} ui={content.ui} onNavigate={(path) => navigate(path)} />} />
+        <Route path="/services/:id" element={<ServiceDetail items={content.services.items} ui={content.ui} onContact={() => navigate('/contact')} />} />
+        <Route path="/journal" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => { }} />} />
+        <Route path="/blog" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => { }} />} />
+        <Route path="/blog/:id" element={<BlogDetail content={blogContent} ui={content.ui} />} />
+        <Route path="/privacy" element={<PrivacyPolicy content={content.privacy} />} />
+        <Route path="/portfolio" element={<div className="pt-20 min-h-screen"><Portfolio title={content.portfolio.title} subtitle={content.portfolio.subtitle} outro={content.portfolio.outro} items={content.portfolio.items} visitLink={content.portfolio.visitLink} lang={lang} /></div>} />
+        <Route path="/contact" element={<div className="pt-20 min-h-screen"><Contact text={content.contact} onSubmitEffect={() => { }} /></div>} />
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
+        <Route path="/admin/blog/edit/:id" element={<AdminBlogEditor />} />
+        <Route path="/admin/blog/edit/:id" element={<AdminBlogEditor />} />
+      </Routes>
+
+      {!isAdmin && location.pathname !== '/contact' && <Contact text={content.contact} onSubmitEffect={() => { }} />}
+
+      {!isAdmin && <Footer content={content.footer} navItems={content.nav} />}
+      {!isAdmin && <FooterLabel />}
+      {!isAdmin && <BackToTop />}
     </div>
   );
 }

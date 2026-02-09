@@ -22,26 +22,27 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    budget: ''
   });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email) {
-       return; // Should be handled by 'required' attribute, but safety check
+      return; // Should be handled by 'required' attribute, but safety check
     }
 
     setStatus('sending');
-    const success = await sendContactFormToTelegram(formData.name, formData.email, formData.message);
-    
+    const success = await sendContactFormToTelegram(formData.name, formData.email, formData.message, formData.budget);
+
     if (success) {
-        setStatus('success');
-        onSubmitEffect();
-        setFormData({ name: '', email: '', message: '' });
-        setTimeout(() => setStatus('idle'), 5000);
+      setStatus('success');
+      onSubmitEffect();
+      setFormData({ name: '', email: '', message: '', budget: '' });
+      setTimeout(() => setStatus('idle'), 5000);
     } else {
-        setStatus('error');
+      setStatus('error');
     }
   };
 
@@ -54,104 +55,138 @@ export const Contact: React.FC<ContactProps> = ({ text, onSubmitEffect }) => {
   };
 
   return (
-    <section className="py-24 bg-transparent relative transition-colors duration-500">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 backdrop-blur-md bg-white/5 p-8 rounded-3xl border border-white/10">
+    <section className="py-12 relative overflow-hidden transition-colors duration-500 min-h-screen flex items-center">
+      {/* Background with blur */}
+      <div className="absolute inset-0 bg-gray-100 dark:bg-black/40 -z-10"></div>
+      <div className="absolute inset-0 bg-transparent dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-charcoal/50 dark:to-black pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal>
-          <h2 className="text-4xl md:text-6xl font-display font-bold mb-8 text-center text-charcoal dark:text-white tracking-tighter">
-            {text.title}<span className="text-brown dark:text-neon">.</span>
-          </h2>
-          
-          <div className="flex justify-start mb-12">
-            <a 
-                href={text.telegramLink} 
-                target="_blank" 
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8 border-b border-charcoal/10 dark:border-white/10 pb-8">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl md:text-5xl font-display font-bold text-charcoal dark:text-white tracking-tighter leading-tight">
+                {text.title}<span className="text-brown dark:text-neon">.</span>
+              </h2>
+              <p className="mt-6 text-lg text-gray-600 dark:text-gray-400 max-w-xl">
+                {text.description}
+              </p>
+            </div>
+
+            <div className="mt-8 md:mt-0">
+              <a
+                href={text.telegramLink}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#24A1DE]/10 border border-[#24A1DE]/20 text-[#24A1DE] hover:bg-[#24A1DE] hover:text-white transition-all duration-300 font-bold uppercase tracking-wide group"
-            >
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#24A1DE]/10 border border-[#24A1DE]/20 text-[#24A1DE] hover:bg-[#24A1DE] hover:text-white transition-all duration-300 font-bold uppercase tracking-wide group text-sm"
+              >
                 <Send size={18} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
                 {text.telegramButton}
-            </a>
+              </a>
+            </div>
           </div>
         </Reveal>
 
         <Reveal delay={200}>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">{text.name} <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg px-4 py-3 text-charcoal dark:text-white focus:outline-none focus:border-brown dark:focus:border-neon transition-all"
-                />
+          <form onSubmit={handleSubmit} className="space-y-8">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+              <div className="space-y-6">
+                <div className="space-y-3 group">
+                  <label className="text-sm font-bold text-gray-400 uppercase tracking-[0.1em] group-focus-within:text-brown dark:group-focus-within:text-neon transition-colors duration-300">{text.name} <span className="text-brown dark:text-neon">*</span></label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder={text.namePlaceholder}
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-transparent border-b border-charcoal/20 dark:border-white/20 px-0 py-4 text-xl md:text-2xl text-charcoal dark:text-white placeholder-gray-300 dark:placeholder-gray-700 focus:outline-none focus:border-brown dark:focus:border-neon transition-all"
+                  />
+                </div>
+
+                <div className="space-y-3 group">
+                  <label className="text-sm font-bold text-gray-400 uppercase tracking-[0.1em] group-focus-within:text-brown dark:group-focus-within:text-neon transition-colors duration-300">{text.email} <span className="text-brown dark:text-neon">*</span></label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder={text.emailPlaceholder}
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-transparent border-b border-charcoal/20 dark:border-white/20 px-0 py-4 text-xl md:text-2xl text-charcoal dark:text-white placeholder-gray-300 dark:placeholder-gray-700 focus:outline-none focus:border-brown dark:focus:border-neon transition-all"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">{text.email} <span className="text-red-500">*</span></label>
-                <input 
-                  type="email" 
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg px-4 py-3 text-charcoal dark:text-white focus:outline-none focus:border-brown dark:focus:border-neon transition-all"
-                />
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-gray-400 uppercase tracking-[0.1em] block mb-4">{text.budgetLabel || 'Budget'}</label>
+                <div className="flex flex-wrap gap-3">
+                  {text.budgetOptions?.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, budget: option }))}
+                      className={`
+                            px-6 py-3 rounded-full border text-sm font-bold uppercase tracking-wider transition-all duration-300
+                            ${formData.budget === option
+                          ? 'bg-brown dark:bg-neon border-brown dark:border-neon text-white dark:text-black shadow-lg scale-105'
+                          : 'bg-transparent border-charcoal/20 dark:border-white/20 text-charcoal/60 dark:text-white/60 hover:border-charcoal/40 dark:hover:border-white/40 hover:text-charcoal dark:hover:text-white'}
+                        `}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="space-y-2 pt-2">
-              <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">
-                {text.message} <span className="text-xs text-gray-400 font-normal lowercase opacity-70 ml-1">(optional)</span>
-              </label>
-              <textarea 
-                rows={4}
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                className="w-full bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg px-4 py-3 text-charcoal dark:text-white focus:outline-none focus:border-brown dark:focus:border-neon transition-all resize-none"
-              ></textarea>
-            </div>
-            
-            <div className="pt-8 text-center">
-              <Button 
-                type="submit" 
-                variant="outline" 
-                className="w-full md:w-auto rounded-full"
-                disabled={status === 'sending'}
-              >
-                {status === 'sending' ? 'Transmitting...' : text.submit}
-              </Button>
             </div>
 
-            {status === 'success' && (
-                <div className="flex items-center justify-center gap-2 text-green-500 mt-4 animate-fade-in">
+            <div className="space-y-3 group pt-2">
+              <label className="text-sm font-bold text-gray-400 uppercase tracking-[0.1em] group-focus-within:text-brown dark:group-focus-within:text-neon transition-colors duration-300">
+                {text.message}
+              </label>
+              <textarea
+                rows={2}
+                name="message"
+                placeholder={text.messagePlaceholder}
+                value={formData.message}
+                onChange={handleChange}
+                className="w-full bg-transparent border-b border-charcoal/20 dark:border-white/20 px-0 py-4 text-xl md:text-2xl text-charcoal dark:text-white placeholder-gray-300 dark:placeholder-gray-700 focus:outline-none focus:border-brown dark:focus:border-neon transition-all resize-none min-h-[100px]"
+              ></textarea>
+            </div>
+
+            <div className="pt-6 flex flex-col items-center gap-6">
+              <Button
+                type="submit"
+                variant="primary"
+                className="w-full rounded-full py-6 text-2xl font-bold uppercase tracking-widest shadow-2xl hover:shadow-[#B59A76]/50 dark:hover:shadow-[#D4FF00]/50 hover:scale-[1.02] active:scale-95 transition-all duration-300 transform border-2 border-transparent hover:border-white/20"
+                disabled={status === 'sending'}
+              >
+                {status === 'sending' ? text.transmitting : text.submit}
+              </Button>
+
+              <div className="flex w-full items-center justify-between text-sm text-gray-400 px-2">
+
+                {/* Status indicator removed */}
+
+                {status === 'success' && (
+                  <div className="flex items-center gap-2 text-green-500 animate-fade-in">
                     <CheckCircle size={20} />
-                    <span className="font-bold">Message sent successfully!</span>
-                </div>
-            )}
-            
-            {status === 'error' && (
-               <div className="flex flex-col items-center gap-2">
-                 <div className="flex items-center gap-2 text-red-500">
-                   <AlertCircle size={20} />
-                   <span className="font-bold uppercase tracking-wider">Sending Failed</span>
-                 </div>
-                 <p className="text-sm text-center text-gray-500">
-                    Network error. Please try again or email us directly at <a href="mailto:bushuev@interphase.pro" className="underline hover:text-brown dark:hover:text-neon">bushuev@interphase.pro</a>
-                 </p>
-                 <button 
-                    type="button" 
-                    onClick={handleRetry}
-                    className="mt-2 text-sm font-bold uppercase tracking-wider text-brown dark:text-neon hover:underline"
-                 >
-                    Retry
-                 </button>
-               </div>
-            )}
+                    <span className="font-bold">{text.sentSuccess}</span>
+                  </div>
+                )}
+
+                {status === 'error' && (
+                  <div className="flex items-center gap-2 text-red-500 animate-fade-in">
+                    <AlertCircle size={20} />
+                    <span className="font-bold">{text.sendFailed}. <button onClick={handleRetry} className="underline hover:text-red-600">{text.retry}</button></span>
+                  </div>
+                )}
+              </div>
+            </div>
           </form>
         </Reveal>
       </div>
     </section>
   );
 };
+

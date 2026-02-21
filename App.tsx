@@ -280,24 +280,25 @@ function AppContent() {
       <ScrollToTop />
       {!isAdmin && <Navbar items={content.nav} lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} ui={content.ui} />}
 
-      <Routes>
-        <Route path="/" element={<HomePage lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} blogPosts={blogPosts} />} />
-        <Route path="/services" element={<Services title={content.services.title} subtitle={content.services.subtitle} items={content.services.items} ui={content.ui} onNavigate={(path) => navigate(path)} />} />
-        <Route path="/services/:id" element={<ServiceDetail items={content.services.items} ui={content.ui} onContact={() => navigate('/contact')} />} />
-        <Route path="/journal" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => { }} />} />
-        <Route path="/blog" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => { }} />} />
-        <Route path="/blog/:id" element={<BlogDetail content={blogContent} ui={content.ui} />} />
-        <Route path="/privacy" element={<PrivacyPolicy content={content.privacy} />} />
-        <Route path="/portfolio" element={<div className="pt-20 min-h-screen"><Portfolio title={content.portfolio.title} subtitle={content.portfolio.subtitle} outro={content.portfolio.outro} items={content.portfolio.items} visitLink={content.portfolio.visitLink} lang={lang} /></div>} />
-        <Route path="/contact" element={<div className="pt-20 min-h-screen"><Contact text={content.contact} onSubmitEffect={() => { }} /></div>} />
+      <main role="main">
+        <Routes>
+          <Route path="/" element={<HomePage lang={lang} setLang={setLang} theme={theme} toggleTheme={toggleTheme} blogPosts={blogPosts} />} />
+          <Route path="/services" element={<Services title={content.services.title} subtitle={content.services.subtitle} items={content.services.items} ui={content.ui} onNavigate={(path) => navigate(path)} />} />
+          <Route path="/services/:id" element={<ServiceDetail items={content.services.items} ui={content.ui} onContact={() => navigate('/contact')} />} />
+          <Route path="/journal" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => { }} />} />
+          <Route path="/blog" element={<BlogList content={blogContent} hasMore={false} onLoadMore={() => { }} />} />
+          <Route path="/blog/:id" element={<BlogDetail content={blogContent} ui={content.ui} />} />
+          <Route path="/privacy" element={<PrivacyPolicy content={content.privacy} />} />
+          <Route path="/portfolio" element={<div className="pt-20 min-h-screen"><Portfolio title={content.portfolio.title} subtitle={content.portfolio.subtitle} outro={content.portfolio.outro} items={content.portfolio.items} visitLink={content.portfolio.visitLink} lang={lang} /></div>} />
+          <Route path="/contact" element={<div className="pt-20 min-h-screen"><Contact text={content.contact} onSubmitEffect={() => { }} /></div>} />
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
-        <Route path="/admin/blog/edit/:id" element={<AdminBlogEditor />} />
-        <Route path="/admin/blog/edit/:id" element={<AdminBlogEditor />} />
-      </Routes>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
+          <Route path="/admin/blog/edit/:id" element={<AdminBlogEditor />} />
+        </Routes>
+      </main>
 
       {!isAdmin && location.pathname !== '/contact' && <Contact text={content.contact} onSubmitEffect={() => { }} />}
 

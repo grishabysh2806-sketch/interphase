@@ -1,26 +1,173 @@
-
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interphase — дизайн, разработка, SEO & GEO продвижение</title>
-    <meta name="description" content="Interphase — студия дизайна и разработки. Создаем сайты, продукты и рост: технический SEO, GEO для AI поиска, контент и продвижение." />
-    <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content="#111111" />
-    <link rel="canonical" href="https://interphase.pro/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Interphase" />
-    <meta property="og:title" content="Interphase — дизайн, разработка, SEO & GEO продвижение" />
-    <meta property="og:description" content="Студия дизайна и разработки. Технический SEO, GEO для AI поиска, контент и продвижение для роста трафика и заявок." />
-    <meta property="og:url" content="https://interphase.pro/" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Interphase — дизайн, разработка, SEO & GEO продвижение" />
-    <meta name="twitter:description" content="Студия дизайна и разработки. Технический SEO, GEO для AI поиска, контент и продвижение." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ===== SEO Core ===== -->
+  <title>Interphase — дизайн, разработка, SEO & GEO продвижение | Студия полного цикла</title>
+  <meta name="description"
+    content="Interphase — студия дизайна и разработки полного цикла. Создаем сайты, мобильные приложения, Telegram Mini Apps, AI-агентов. Технический SEO, GEO для AI поиска, контент и продвижение для роста трафика и заявок." />
+  <meta name="keywords"
+    content="веб-дизайн, разработка сайтов, создание сайтов, UI/UX дизайн, SEO продвижение, GEO оптимизация, Telegram Mini App, мобильные приложения, брендинг, AI агент, web development, landing page, React, Next.js, интернет-агентство, digital студия, заказать сайт, Interphase" />
+  <meta name="author" content="Interphase" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="theme-color" content="#111111" />
+
+  <!-- ===== Canonical ===== -->
+  <link rel="canonical" href="https://interphase.pro/" />
+
+  <!-- ===== GEO теги ===== -->
+  <meta name="geo.region" content="RU" />
+  <meta name="geo.placename" content="Россия" />
+  <meta name="geo.position" content="55.7558;37.6173" />
+  <meta name="ICBM" content="55.7558, 37.6173" />
+
+  <!-- ===== Open Graph ===== -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Interphase" />
+  <meta property="og:title" content="Interphase — дизайн, разработка, SEO & GEO продвижение" />
+  <meta property="og:description"
+    content="Студия дизайна и разработки полного цикла. Технический SEO, GEO для AI поиска, контент и продвижение для роста трафика и заявок." />
+  <meta property="og:url" content="https://interphase.pro/" />
+  <meta property="og:image" content="https://interphase.pro/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="ru_RU" />
+
+  <!-- ===== Twitter Card ===== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Interphase — дизайн, разработка, SEO & GEO продвижение" />
+  <meta name="twitter:description"
+    content="Студия дизайна и разработки полного цикла. Технический SEO, GEO для AI поиска, контент и продвижение." />
+  <meta name="twitter:image" content="https://interphase.pro/og-image.png" />
+
+  <!-- ===== Verification ===== -->
+  <!-- Yandex: verified via yandex_3b6a146ae8d4457d.html -->
+  <!-- <meta name="google-site-verification" content="ВСТАВЬТЕ_КОД_GOOGLE" /> -->
+
+  <!-- ===== Favicon & Icons ===== -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+
+  <!-- ===== PWA Manifest ===== -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+
+  <!-- ===== Schema.org JSON-LD ===== -->
+
+  <!-- Organization -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Interphase",
+      "url": "https://interphase.pro",
+      "logo": "https://interphase.pro/favicon.svg",
+      "description": "Студия дизайна и разработки полного цикла. Создаем сайты, мобильные приложения, Telegram Mini Apps, AI-агентов. SEO и GEO продвижение.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "url": "https://t.me/interphase_art",
+        "email": "bushuev@interphase.pro",
+        "availableLanguage": ["Russian", "English"]
+      },
+      "sameAs": [
+        "https://t.me/interphase_art",
+        "https://t.me/interphase_pro"
+      ]
+    }
+    </script>
+
+  <!-- WebSite -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Interphase",
+      "url": "https://interphase.pro",
+      "inLanguage": ["ru", "en"],
+      "description": "Interphase — студия дизайна, разработки и продвижения полного цикла."
+    }
+    </script>
+
+  <!-- LocalBusiness -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "Interphase",
+      "url": "https://interphase.pro",
+      "logo": "https://interphase.pro/favicon.svg",
+      "image": "https://interphase.pro/og-image.png",
+      "description": "Агентство полного цикла: дизайн, разработка, AI, SEO & GEO продвижение.",
+      "email": "bushuev@interphase.pro",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Москва",
+        "addressCountry": "RU"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 55.7558,
+        "longitude": 37.6173
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Россия"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "10:00",
+        "closes": "19:00"
+      },
+      "priceRange": "$$",
+      "serviceType": ["Web Design", "Web Development", "SEO", "GEO Optimization", "Brand Identity", "AI Agent Development", "Mobile App Development"]
+    }
+    </script>
+
+  <!-- BreadcrumbList -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://interphase.pro/" },
+        { "@type": "ListItem", "position": 2, "name": "Услуги", "item": "https://interphase.pro/#/services" },
+        { "@type": "ListItem", "position": 3, "name": "Портфолио", "item": "https://interphase.pro/#/portfolio" },
+        { "@type": "ListItem", "position": 4, "name": "Блог", "item": "https://interphase.pro/#/blog" },
+        { "@type": "ListItem", "position": 5, "name": "Контакты", "item": "https://interphase.pro/#/contact" }
+      ]
+    }
+    </script>
+</head>
+
+<body>
+  <!-- Noscript fallback for crawlers -->
+  <noscript>
+    <div style="padding:2rem;font-family:sans-serif;max-width:800px;margin:auto;">
+      <h1>Interphase — студия дизайна и разработки</h1>
+      <p>Мы — агентство полного цикла, предлагающее дизайн, разработку сайтов, мобильных приложений, Telegram Mini Apps,
+        AI-агентов, а также SEO и GEO продвижение.</p>
+      <h2>Наши услуги</h2>
+      <ul>
+        <li>UI/UX Дизайн</li>
+        <li>Веб-разработка (React, Next.js)</li>
+        <li>Экосистема Telegram</li>
+        <li>Мобильные приложения</li>
+        <li>Брендинг</li>
+        <li>Сложные интеграции</li>
+        <li>Создание AI-агентов</li>
+        <li>SEO &amp; GEO продвижение</li>
+        <li>Защита репутации</li>
+      </ul>
+      <p>Контакт: <a href="mailto:bushuev@interphase.pro">bushuev@interphase.pro</a> | <a
+          href="https://t.me/interphase_art">Telegram</a></p>
+    </div>
+  </noscript>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>

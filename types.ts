@@ -62,6 +62,25 @@ export interface BlogPost {
 
 export type Post = BlogPost;
 
+// Block Editor Types (vc.ru-style)
+export type BlockType = 'paragraph' | 'heading' | 'image' | 'quote' | 'list' | 'delimiter' | 'code';
+
+export interface EditorBlock {
+  id: string;
+  type: BlockType;
+  data: {
+    text?: string;
+    level?: number; // for headings: 2 or 3
+    url?: string; // for images
+    caption?: string; // for images
+    style?: 'unordered' | 'ordered'; // for lists
+    items?: string[]; // for list items
+    language?: string; // for code blocks
+    alignment?: 'left' | 'center'; // for quotes
+    author?: string; // for quotes
+  };
+}
+
 export interface USPItem {
   title: string;
   description: string;

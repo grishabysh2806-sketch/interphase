@@ -1,0 +1,20 @@
+# robots.txt for interphase.pro
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Yandex-specific
+User-agent: Yandex
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Host: https://interphase.pro
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://interphase.pro/sitemap.xml

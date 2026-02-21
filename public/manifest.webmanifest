@@ -1,0 +1,23 @@
+{
+    "name": "Interphase — дизайн, разработка, SEO & GEO продвижение",
+    "short_name": "Interphase",
+    "description": "Студия дизайна и разработки полного цикла. Создаем сайты, продукты, AI-агентов и выстраиваем SEO/GEO продвижение.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#111111",
+    "theme_color": "#111111",
+    "lang": "ru",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "/favicon-dark.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "monochrome"
+        }
+    ]
+}

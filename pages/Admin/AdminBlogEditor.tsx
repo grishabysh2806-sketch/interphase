@@ -1,18 +1,22 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BlogPost } from '../../types';
 import { blogService } from '../../services/blogService';
-import { ArrowLeft, Save, Image as ImageIcon, Bold, Italic, Link as LinkIcon, Upload, Quote } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
+import { ArrowLeft, Upload, CloudOff, Check, Loader2, Settings, X, ChevronDown } from 'lucide-react';
+import { BlockEditor, blocksToHtml } from '../../components/admin/BlockEditor';
 
 export const AdminBlogEditor: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const editorRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const lastSelectionRef = useRef<Range | null>(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showMeta, setShowMeta] = useState(false);
+  const [coverDragging, setCoverDragging] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState<Partial<BlogPost>>({
     title: '',
     excerpt: '',
@@ -22,9 +26,8 @@ export const AdminBlogEditor: React.FC = () => {
     readTime: '5 min',
     author: 'Interphase'
   });
-  const [isEditorFocused, setIsEditorFocused] = useState(false);
 
-  const [showPreview, setShowPreview] = useState(false);
+  const contentRef = useRef(formData.content);
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_session');
@@ -32,10 +35,7 @@ export const AdminBlogEditor: React.FC = () => {
       navigate('/admin');
       return;
     }
-
-    if (id) {
-      loadPost(id);
-    }
+    if (id) loadPost(id);
   }, [id, navigate]);
 
   const loadPost = async (postId: string) => {
@@ -44,6 +44,7 @@ export const AdminBlogEditor: React.FC = () => {
       const post = await blogService.getPost(postId);
       if (post) {
         setFormData(post);
+        contentRef.current = post.content;
       }
     } catch (error) {
       console.error('Failed to load post', error);
@@ -52,11 +53,13 @@ export const AdminBlogEditor: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const html = editorRef.current ? editorRef.current.innerHTML : formData.content || '';
-    const payload = { ...formData, content: html };
+  const handleEditorChange = useCallback((html: string) => {
+    contentRef.current = html;
+  }, []);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    const payload = { ...formData, content: contentRef.current || '' };
 
     try {
       if (id) {
@@ -64,606 +67,283 @@ export const AdminBlogEditor: React.FC = () => {
       } else {
         await blogService.createPost(payload as Omit<BlogPost, 'id' | 'date'>);
       }
-      navigate('/admin/dashboard');
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+        navigate('/admin/dashboard');
+      }, 800);
     } catch (error) {
       console.error('Failed to save post', error);
-      alert('Failed to save post');
+      alert('Ошибка сохранения');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const escapeHtml = (value: string) =>
-    value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-
-  const normalizeContent = (value?: string) => {
-    if (!value) return '';
-    if (value.includes('<')) return value;
-    const trimmed = value.trim();
-    if (!trimmed) return '';
-    const paragraphs = trimmed
-      .split(/\n{2,}/)
-      .map(block => block.split('\n').map(escapeHtml).join('<br/>'));
-    return paragraphs.map(p => `<p>${p}</p>`).join('');
-  };
-
-  const syncEditorHtml = () => {
-    if (!editorRef.current) return;
-    const html = editorRef.current.innerHTML;
-    setFormData(prev => ({ ...prev, content: html }));
-  };
-
-  useEffect(() => {
-    if (!editorRef.current || isEditorFocused) return;
-    const normalized = normalizeContent(formData.content || '');
-    if (editorRef.current.innerHTML !== normalized) {
-      editorRef.current.innerHTML = normalized;
-    }
-  }, [formData.content, isEditorFocused]);
-
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      if (!editorRef.current) return;
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-      const range = selection.getRangeAt(0);
-      if (editorRef.current.contains(range.commonAncestorContainer)) {
-        lastSelectionRef.current = range.cloneRange();
-      }
-    };
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange);
-    };
-  }, []);
-
-  const handleEditorKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      document.execCommand('insertHTML', false, '<p><br/></p>');
-      syncEditorHtml();
-    } else if (event.key === 'Enter' && event.shiftKey) {
-      event.preventDefault();
-      document.execCommand('insertHTML', false, '<br/>');
-      syncEditorHtml();
-    }
-  };
-
-  const handleEditorMouseUp = () => {
-    const range = getEditorRange();
-    if (range) {
-      lastSelectionRef.current = range.cloneRange();
-    }
-  };
-
-  const handleEditorKeyUp = () => {
-    const range = getEditorRange();
-    if (range) {
-      lastSelectionRef.current = range.cloneRange();
-    }
-  };
-
-  const handleEditorPaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
-    const text = event.clipboardData.getData('text/plain');
-    if (!text) return;
-    event.preventDefault();
-    const blocks = text
-      .replace(/\r\n/g, '\n')
-      .split(/\n{2,}/)
-      .map(block => block.split('\n').map(escapeHtml).join('<br/>'));
-    const html = blocks.filter(Boolean).map(block => `<p>${block}</p>`).join('');
-    insertHtmlAtCursor(html);
-  };
-
-  const getEditorRange = () => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      if (editorRef.current?.contains(range.commonAncestorContainer)) {
-        return range;
-      }
-    }
-    if (lastSelectionRef.current && editorRef.current?.contains(lastSelectionRef.current.commonAncestorContainer)) {
-      return lastSelectionRef.current;
-    }
-    return null;
-  };
-
-  const setSelectionRange = (range: Range) => {
-    const selection = window.getSelection();
-    if (!selection) return;
-    selection.removeAllRanges();
-    selection.addRange(range);
-    lastSelectionRef.current = range.cloneRange();
-  };
-
-  const createRangeAtEnd = () => {
-    if (!editorRef.current) return null;
-    const range = document.createRange();
-    range.selectNodeContents(editorRef.current);
-    range.collapse(false);
-    return range;
-  };
-
-  const insertHtmlAtCursor = (html: string) => {
-    const range = getEditorRange() ?? createRangeAtEnd();
-    if (!range) {
-      return;
-    }
-    range.deleteContents();
-    const fragment = range.createContextualFragment(html);
-    const lastNode = fragment.lastChild;
-    range.insertNode(fragment);
-    if (lastNode) {
-      range.setStartAfter(lastNode);
-      range.collapse(true);
-      setSelectionRange(range);
-    }
-    syncEditorHtml();
-  };
-
-  const normalizeEditorBlocks = () => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const blockTags = new Set(['P', 'DIV', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'PRE', 'TABLE', 'IMG', 'FIGURE', 'HR']);
-    const nodes = Array.from(editor.childNodes) as ChildNode[];
-    let wrapper: HTMLParagraphElement | null = null;
-    const ensureWrapper = (beforeNode?: ChildNode) => {
-      if (!wrapper) {
-        wrapper = document.createElement('p');
-        if (beforeNode) {
-          editor.insertBefore(wrapper, beforeNode);
-        } else {
-          editor.appendChild(wrapper);
-        }
-      }
-      return wrapper;
-    };
-    const closeWrapper = () => {
-      if (wrapper && !wrapper.childNodes.length) {
-        wrapper.appendChild(document.createElement('br'));
-      }
-      wrapper = null;
-    };
-    nodes.forEach((node: ChildNode) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        if (blockTags.has(el.tagName)) {
-          closeWrapper();
-          return;
-        }
-        const target = ensureWrapper(node);
-        target.appendChild(node);
-        return;
-      }
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent ?? '';
-        if (!text.trim()) {
-          if (wrapper) {
-            wrapper.appendChild(node);
-          } else {
-            editor.removeChild(node);
-          }
-          return;
-        }
-        const target = ensureWrapper(node);
-        target.appendChild(node);
-        return;
-      }
-      const target = ensureWrapper(node);
-      target.appendChild(node);
-    });
-    closeWrapper();
-    if (!editor.childNodes.length) {
-      editor.innerHTML = '<p><br/></p>';
-    }
-  };
-
-  const replaceCurrentBlock = (tag: string, currentRange?: Range | null) => {
-    const baseRange = currentRange ?? getEditorRange();
-    const anchorNode = baseRange?.startContainer ?? null;
-    if (!anchorNode) {
-      return false;
-    }
-    const node = anchorNode instanceof Element ? anchorNode : anchorNode.parentElement;
-    const block = node?.closest('p,div,blockquote,h1,h2,h3,h4,h5,h6');
-    if (!block || !editorRef.current?.contains(block) || block === editorRef.current) {
-      return false;
-    }
-    const replacement = document.createElement(tag);
-    replacement.innerHTML = block.innerHTML;
-    block.replaceWith(replacement);
-    const newRange = document.createRange();
-    newRange.selectNodeContents(replacement);
-    newRange.collapse(false);
-    setSelectionRange(newRange);
-    syncEditorHtml();
-    return true;
-  };
-
-  const applyBlockTag = (tag: string, providedRange?: Range | null) => {
-    normalizeEditorBlocks();
-    const range = getEditorRange() ?? createRangeAtEnd();
-    if (!range) return;
-    setSelectionRange(range);
-    const selectedText = range.toString();
-    if (selectedText.trim()) {
-      const contents = range.extractContents();
-      const wrapper = document.createElement(tag);
-      wrapper.appendChild(contents);
-      range.insertNode(wrapper);
-      const after = document.createRange();
-      after.setStartAfter(wrapper);
-      after.collapse(true);
-      setSelectionRange(after);
-      syncEditorHtml();
-      return;
-    }
-    const replaced = replaceCurrentBlock(tag, range);
-    if (replaced) return;
-    const anchorNode = range.startContainer;
-    if (anchorNode.nodeType === Node.TEXT_NODE && anchorNode.parentNode === editorRef.current) {
-      const wrapper = document.createElement(tag);
-      const textNode = anchorNode as Text;
-      const parent = textNode.parentNode;
-      if (parent) {
-        wrapper.appendChild(textNode);
-        parent.insertBefore(wrapper, textNode);
-        const newRange = document.createRange();
-        newRange.selectNodeContents(wrapper);
-        newRange.collapse(false);
-        setSelectionRange(newRange);
-        syncEditorHtml();
-        return;
-      }
-    }
-    insertHtmlAtCursor(`<${tag}><br/></${tag}>`);
-  };
-
-  const insertFormat = (tag: string) => {
-    if (!editorRef.current) return;
-    const range = getEditorRange();
-    if (range) {
-      setSelectionRange(range);
-    }
-    editorRef.current.focus();
-    if (tag === 'b') {
-      document.execCommand('bold');
-      syncEditorHtml();
-    } else if (tag === 'i') {
-      document.execCommand('italic');
-      syncEditorHtml();
-    } else if (tag === 'h3' || tag === 'p' || tag === 'blockquote') {
-      applyBlockTag(tag, null);
-    }
-  };
-
-  const handleToolbarMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const range = getEditorRange();
-    if (range) {
-      lastSelectionRef.current = range.cloneRange();
-    }
-  };
-
-  const insertLink = () => {
-    const url = prompt('Enter URL:', 'https://');
-    if (!url) return;
-
-    // Basic validation
-    let validUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        validUrl = 'https://' + url;
-    }
-
-    const selectedText = getEditorRange()?.toString() || '';
-    const linkText = selectedText || prompt('Enter link text:', 'link') || 'link';
-    const textToInsert = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer" class="text-brown dark:text-neon hover:underline">${escapeHtml(linkText)}</a>`;
-    insertHtmlAtCursor(textToInsert);
-  };
-
-  const insertImageUrl = () => {
-    const url = prompt('Image URL (must start with http/https):');
-    if(url) {
-       if (url.startsWith('http')) {
-         insertHtmlAtCursor(`<img src="${url}" alt="Image" class="w-full h-auto rounded-2xl my-8 shadow-lg" loading="lazy" />`);
-       } else {
-         alert('Please enter a valid URL starting with http:// or https://');
-       }
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleCoverUpload = async (file: File) => {
     if (!supabase) {
-      alert('Supabase is not configured. Cannot upload images.');
+      const reader = new FileReader();
+      reader.onload = () => setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
+      reader.readAsDataURL(file);
       return;
     }
-
-    const uploadingToken = `uploading-${Date.now()}`;
-    const uploadingText = `<span data-upload="${uploadingToken}">Uploading image...</span>`;
-    insertHtmlAtCursor(uploadingText);
-    
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('blog-images')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data } = supabase.storage.from('blog-images').getPublicUrl(filePath);
-      
-      // Replace placeholder with actual image tag
-      const currentContent = editorRef.current?.innerHTML || formData.content || '';
-      const newContent = currentContent.replace(
-        new RegExp(`<span data-upload="${uploadingToken}">[\\s\\S]*?<\\/span>`),
-        `<img src="${data.publicUrl}" alt="Blog Image" class="w-full h-auto rounded-2xl my-8 shadow-lg" loading="lazy" />`
-      );
-      if (editorRef.current) {
-        editorRef.current.innerHTML = newContent;
-      }
-      setFormData(prev => ({ ...prev, content: newContent }));
-
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Upload failed. Please ensure you have created a public bucket named "blog-images" in Supabase.');
-      // Remove placeholder
-      const currentContent = editorRef.current?.innerHTML || formData.content || '';
-      const cleaned = currentContent.replace(
-        new RegExp(`<span data-upload="${uploadingToken}">[\\s\\S]*?<\\/span>`),
-        ''
-      );
-      if (editorRef.current) {
-        editorRef.current.innerHTML = cleaned;
-      }
-      setFormData(prev => ({ ...prev, content: cleaned }));
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      const fileName = `cover-${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage.from('blog-images').upload(fileName, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from('blog-images').getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, imageUrl: data.publicUrl }));
+    } catch (err) {
+      console.error('Cover upload failed:', err);
+      alert('Ошибка загрузки обложки');
     }
   };
 
+  const handleCoverDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setCoverDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleCoverUpload(file);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-dark flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-bone dark:bg-dark p-8">
-      <div className="max-w-[1600px] mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-white dark:bg-dark">
+      {/* Top Bar */}
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-dark/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5">
+        <div className="max-w-[1100px] mx-auto flex items-center justify-between px-6 h-14">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-charcoal/50 rounded-lg transition-colors"
+              className="p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
-              <ArrowLeft className="text-charcoal dark:text-white" />
+              <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
             </button>
-            <h1 className="text-3xl font-display font-bold text-charcoal dark:text-white">
-              {id ? 'Edit Blog' : 'New Blog'}
-            </h1>
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              {id ? 'Редактирование' : 'Новая запись'}
+            </span>
           </div>
-          
-          <button 
-            type="button" 
-            onClick={() => setShowPreview(!showPreview)} 
-            className={`px-4 py-2 rounded-lg font-bold uppercase tracking-wider text-sm transition-colors border ${showPreview ? 'bg-brown dark:bg-neon text-white dark:text-charcoal border-brown dark:border-neon' : 'bg-transparent border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5'}`}
-          >
-            {showPreview ? 'Close Preview' : 'Show Preview'}
-          </button>
+
+          <div className="flex items-center gap-2">
+            {!supabase && (
+              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 mr-2" title="Offline mode">
+                <CloudOff size={16} />
+                <span className="text-xs font-medium">Offline</span>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowMeta(!showMeta)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${showMeta
+                ? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
+                : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/10'
+                }`}
+            >
+              <Settings size={16} />
+              <span className="hidden sm:inline">Настройки</span>
+            </button>
+
+            <button
+              onClick={handleSubmit}
+              disabled={saving || !formData.title?.trim()}
+              className="flex items-center gap-2 px-5 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
+            >
+              {saving ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : saved ? (
+                <Check size={16} />
+              ) : null}
+              {saved ? 'Сохранено' : saving ? 'Сохранение...' : 'Опубликовать'}
+            </button>
+          </div>
         </div>
+      </header>
 
-        <div className={`grid grid-cols-1 ${showPreview ? 'lg:grid-cols-2' : ''} gap-8`}>
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="bg-white dark:bg-card/30 p-8 rounded-2xl border border-charcoal/10 dark:border-white/10 space-y-6">
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white"
-                >
-                  <option value="DESIGN">DESIGN</option>
-                  <option value="ART">ART</option>
-                  <option value="CODE">CODE</option>
-                  <option value="CULTURE">CULTURE</option>
-                  <option value="TECH">TECH</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Main Image URL
-              </label>
-              <input
-                type="text"
-                name="imageUrl"
-                value={formData.imageUrl}
-                onChange={handleChange}
-                placeholder="https://..."
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Excerpt (Short Description)
-              </label>
-              <textarea
-                name="excerpt"
-                required
-                rows={3}
-                value={formData.excerpt}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Content
-              </label>
-              
-              {/* Editor Toolbar */}
-              <div className="flex items-center gap-2 mb-2 p-2 bg-gray-50 dark:bg-charcoal/50 rounded-lg border border-gray-200 dark:border-gray-700 flex-wrap">
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('b')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Bold">
-                   <Bold size={18} className="text-charcoal dark:text-white" />
-                 </button>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('i')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Italic">
-                   <Italic size={18} className="text-charcoal dark:text-white" />
-                 </button>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('h3')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Header">
-                   H3
-                 </button>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('p')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors font-bold text-charcoal dark:text-white text-sm" title="Paragraph">
-                   P
-                 </button>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => insertFormat('blockquote')} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors" title="Quote">
-                   <Quote size={18} className="text-charcoal dark:text-white" />
-                 </button>
-                 <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={insertLink} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Link">
-                   <LinkIcon size={18} className="text-charcoal dark:text-white group-hover:text-blue-500 transition-colors" />
-                 </button>
-                 <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={insertImageUrl} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors group" title="Insert Image by URL">
-                   <ImageIcon size={18} className="text-charcoal dark:text-white group-hover:text-green-500 transition-colors" />
-                 </button>
-                 <button type="button" onMouseDown={handleToolbarMouseDown} onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 bg-brown dark:bg-neon text-white dark:text-charcoal text-xs font-bold uppercase rounded ml-auto hover:opacity-90 transition-opacity">
-                   <Upload size={14} />
-                   <span>Upload Image</span>
-                 </button>
-                 <input 
-                   type="file" 
-                   ref={fileInputRef} 
-                   className="hidden" 
-                   accept="image/*"
-                   onChange={handleImageUpload}
-                 />
-              </div>
-              <p className="text-xs text-gray-500 mb-2">
-                Tip: Use the image button to insert images. Pasting URLs directly will result in text.
-              </p>
-
-              <div
-                ref={editorRef}
-                contentEditable
-                onInput={syncEditorHtml}
-                onKeyDown={handleEditorKeyDown}
-                onKeyUp={handleEditorKeyUp}
-                onMouseUp={handleEditorMouseUp}
-                onPaste={handleEditorPaste}
-                onFocus={() => setIsEditorFocused(true)}
-                onBlur={() => setIsEditorFocused(false)}
-                className="min-h-[320px] w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white text-sm prose prose-sm dark:prose-invert max-w-none prose-h3:text-xl prose-h3:font-bold prose-h3:tracking-tight prose-blockquote:border-l-4 prose-blockquote:border-brown/40 dark:prose-blockquote:border-neon/40 prose-blockquote:pl-4 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Read Time
-                </label>
-                <input
-                  type="text"
-                  name="readTime"
-                  value={formData.readTime}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white"
-                />
-              </div>
-              
-               <div>
-                <label className="block text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Author
-                </label>
-                <input
-                  type="text"
-                  name="author"
-                  value={formData.author}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-charcoal/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-brown dark:focus:border-neon text-charcoal dark:text-white"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-6">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex items-center gap-2 px-8 py-3 bg-brown dark:bg-neon text-white dark:text-charcoal font-bold uppercase tracking-wider rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
-                <Save size={20} />
-                {loading ? 'Saving...' : 'Save Blog Post'}
+      {/* Settings Panel (slide) */}
+      {showMeta && (
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setShowMeta(false)}>
+          <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
+          <div
+            className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] h-full shadow-2xl overflow-y-auto animate-slide-in-right"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">Настройки записи</h3>
+              <button onClick={() => setShowMeta(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                <X size={18} className="text-gray-400" />
               </button>
             </div>
 
-          </form>
-
-          {/* Preview Panel */}
-          {showPreview && (
-            <div className="space-y-8">
-              <div className="sticky top-8 bg-white dark:bg-card/30 p-8 rounded-2xl border border-charcoal/10 dark:border-white/10 max-h-[calc(100vh-4rem)] overflow-y-auto">
-                <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-gray-700 pb-2">
-                  Live Preview
-                </h2>
-                
-                <h1 className="text-3xl md:text-5xl font-display font-bold text-charcoal dark:text-white mb-6">
-                  {formData.title || 'Untitled Post'}
-                </h1>
-
-                {formData.imageUrl && (
-                  <div className="relative aspect-[21/9] rounded-2xl overflow-hidden mb-8">
-                    <img 
-                      src={formData.imageUrl} 
-                      alt={formData.title}
-                      className="w-full h-full object-cover"
-                    />
+            <div className="p-5 space-y-5">
+              {/* Cover Image */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Обложка
+                </label>
+                {formData.imageUrl ? (
+                  <div className="relative rounded-xl overflow-hidden aspect-video">
+                    <img src={formData.imageUrl} alt="Cover" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                      className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-lg text-white hover:bg-black/80 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={e => { e.preventDefault(); setCoverDragging(true); }}
+                    onDragLeave={() => setCoverDragging(false)}
+                    onDrop={handleCoverDrop}
+                    onClick={() => coverInputRef.current?.click()}
+                    className={`rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${coverDragging
+                        ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-white/5'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                  >
+                    <Upload size={24} className="mx-auto mb-2 text-gray-300 dark:text-gray-600" />
+                    <p className="text-xs text-gray-400 dark:text-gray-500">Drag & drop или нажмите</p>
                   </div>
                 )}
+                <input ref={coverInputRef} type="file" className="hidden" accept="image/*"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleCoverUpload(f); }} />
+              </div>
 
-                <div 
-                  className="prose dark:prose-invert max-w-none prose-lg prose-img:rounded-2xl prose-headings:font-display prose-h3:tracking-tight prose-blockquote:border-l-4 prose-blockquote:border-brown/40 dark:prose-blockquote:border-neon/40 prose-blockquote:pl-4 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300 prose-a:text-brown dark:prose-a:text-neon hover:prose-a:opacity-80 transition-opacity"
-                  dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400 italic">Start typing to see content...</p>' }}
+              {/* Category */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Категория
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.category || 'DESIGN'}
+                    onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full appearance-none px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white pr-8"
+                  >
+                    <option value="DESIGN">Design</option>
+                    <option value="ART">Art</option>
+                    <option value="CODE">Code</option>
+                    <option value="CULTURE">Culture</option>
+                    <option value="TECH">Tech</option>
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Excerpt */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Описание
+                </label>
+                <textarea
+                  value={formData.excerpt || ''}
+                  onChange={e => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                  rows={3}
+                  placeholder="Краткое описание для карточки..."
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white placeholder:text-gray-300 dark:placeholder:text-gray-600 resize-none"
+                />
+              </div>
+
+              {/* Author */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Автор
+                </label>
+                <input
+                  type="text"
+                  value={formData.author || ''}
+                  onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white"
+                />
+              </div>
+
+              {/* Read time */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Время чтения
+                </label>
+                <input
+                  type="text"
+                  value={formData.readTime || ''}
+                  onChange={e => setFormData(prev => ({ ...prev, readTime: e.target.value }))}
+                  placeholder="5 min"
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white"
+                />
+              </div>
+
+              {/* Image URL (manual) */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  URL обложки
+                </label>
+                <input
+                  type="text"
+                  value={formData.imageUrl || ''}
+                  onChange={e => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white"
                 />
               </div>
             </div>
-          )}
+          </div>
         </div>
+      )}
+
+      {/* Main Content */}
+      <div className="max-w-[900px] mx-auto px-6 py-12">
+        {/* Title Input (inline like vc.ru) */}
+        <input
+          type="text"
+          value={formData.title || ''}
+          onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="Заголовок"
+          className="w-full text-[40px] font-bold text-gray-900 dark:text-white bg-transparent border-none outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 mb-2 leading-tight"
+        />
+
+        {/* Excerpt hint */}
+        {!formData.excerpt && (
+          <p className="text-sm text-gray-300 dark:text-gray-600 mb-8">
+            Добавьте описание в настройках →
+          </p>
+        )}
+        {formData.excerpt && (
+          <p className="text-base text-gray-400 dark:text-gray-500 mb-8 leading-relaxed">
+            {formData.excerpt}
+          </p>
+        )}
+
+        {/* Cover Image Preview */}
+        {formData.imageUrl && (
+          <div className="mb-10 rounded-2xl overflow-hidden">
+            <img src={formData.imageUrl} alt="Cover" className="w-full h-auto max-h-[400px] object-cover" />
+          </div>
+        )}
+
+        {/* Block Editor */}
+        <BlockEditor
+          initialHtml={formData.content || ''}
+          onChange={handleEditorChange}
+        />
       </div>
+
+      {/* Animations */}
+      <style>{`
+        @keyframes slide-in-right {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.25s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

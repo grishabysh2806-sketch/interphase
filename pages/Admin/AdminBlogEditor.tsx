@@ -81,10 +81,14 @@ export const AdminBlogEditor: React.FC = () => {
   };
 
   const handleCoverUpload = async (file: File) => {
-    if (!supabase) {
+    const readAsBase64 = () => {
       const reader = new FileReader();
       reader.onload = () => setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
       reader.readAsDataURL(file);
+    };
+
+    if (!supabase) {
+      readAsBase64();
       return;
     }
     try {
@@ -95,8 +99,8 @@ export const AdminBlogEditor: React.FC = () => {
       const { data } = supabase.storage.from('blog-images').getPublicUrl(fileName);
       setFormData(prev => ({ ...prev, imageUrl: data.publicUrl }));
     } catch (err) {
-      console.error('Cover upload failed:', err);
-      alert('Ошибка загрузки обложки');
+      console.warn('Supabase cover upload failed, using base64 fallback:', err);
+      readAsBase64();
     }
   };
 
@@ -205,8 +209,8 @@ export const AdminBlogEditor: React.FC = () => {
                     onDrop={handleCoverDrop}
                     onClick={() => coverInputRef.current?.click()}
                     className={`rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${coverDragging
-                        ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-white/5'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'border-gray-900 dark:border-white bg-gray-50 dark:bg-white/5'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
                   >
                     <Upload size={24} className="mx-auto mb-2 text-gray-300 dark:text-gray-600" />
